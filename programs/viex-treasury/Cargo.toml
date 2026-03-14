@@ -1,0 +1,25 @@
+[package]
+name = "viex-treasury"
+version = "0.1.0"
+description = "VIEX Treasury: Cross-border multi-currency stablecoin treasury with KYC, AML, Travel Rule, and FX conversion"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "viex_treasury"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.31.1", features = ["token", "token_2022", "associated_token", "metadata"] }
+spl-token-2022 = "6.0.0"
+spl-token-metadata-interface = "0.5.1"
+solana-security-txt = "1.1.1"

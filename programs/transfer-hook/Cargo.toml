@@ -1,0 +1,26 @@
+[package]
+name = "viex-transfer-hook"
+version = "0.1.0"
+description = "VIEX Transfer Hook: Enforces blacklist and KYC checks on every Token-2022 transfer"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "viex_transfer_hook"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.31.1" }
+anchor-spl = { version = "0.31.1", features = ["token_2022"] }
+spl-token-2022 = { version = "6.0.0", features = ["no-entrypoint"], default-features = false }
+spl-transfer-hook-interface = "0.9.0"
+spl-tlv-account-resolution = "0.9.0"
+solana-security-txt = "1.1.1"

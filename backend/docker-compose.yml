@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    container_name: viex-treasury-api
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - RPC_URL=${RPC_URL:-https://api.devnet.solana.com}
+      - OPERATOR_KEYPAIR=/app/keys/operator.json
+      - API_KEY=${API_KEY:-}
+      - VIEX_TREASURY_PROGRAM_ID=${VIEX_TREASURY_PROGRAM_ID:-3rzgKqvEkhJiWivtTNg5WjSkFi8T4pNaQECWCssc8pAU}
+      - VIEX_TRANSFER_HOOK_PROGRAM_ID=${VIEX_TRANSFER_HOOK_PROGRAM_ID:-4Zmj6AtwQ615LnzWnaoXmBVTzQHvTd7jyD1GefZCMSwY}
+    volumes:
+      - ./data:/app/data
+      - ${OPERATOR_KEYPAIR_PATH:-~/.config/solana/id.json}:/app/keys/operator.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

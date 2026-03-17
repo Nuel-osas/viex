@@ -1,0 +1,124 @@
+{
+  "address": "4Zmj6AtwQ615LnzWnaoXmBVTzQHvTd7jyD1GefZCMSwY",
+  "metadata": {
+    "name": "viex_transfer_hook",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "VIEX Transfer Hook: Enforces blacklist and KYC checks on every Token-2022 transfer"
+  },
+  "instructions": [
+    {
+      "name": "execute",
+      "docs": [
+        "Called by Token-2022 on every transfer.",
+        "Enforces blacklist and allowlist (KYC gate) checks."
+      ],
+      "discriminator": [
+        130,
+        221,
+        242,
+        154,
+        13,
+        193,
+        189,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "source_account"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "destination_account"
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "stablecoin"
+        },
+        {
+          "name": "source_blacklist",
+          "optional": true
+        },
+        {
+          "name": "destination_blacklist",
+          "optional": true
+        },
+        {
+          "name": "source_allowlist",
+          "optional": true
+        },
+        {
+          "name": "destination_allowlist",
+          "optional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_extra_account_meta_list",
+      "docs": [
+        "Initialize extra account metas for blacklist + allowlist PDA resolution"
+      ],
+      "discriminator": [
+        92,
+        197,
+        174,
+        197,
+        41,
+        124,
+        19,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "SenderBlacklisted",
+      "msg": "Sender is blacklisted"
+    },
+    {
+      "code": 6001,
+      "name": "RecipientBlacklisted",
+      "msg": "Recipient is blacklisted"
+    },
+    {
+      "code": 6002,
+      "name": "SenderNotAllowlisted",
+      "msg": "Sender is not on the allowlist (KYC required)"
+    },
+    {
+      "code": 6003,
+      "name": "RecipientNotAllowlisted",
+      "msg": "Recipient is not on the allowlist (KYC required)"
+    }
+  ]
+}

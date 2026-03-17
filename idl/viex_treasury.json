@@ -1,0 +1,5008 @@
+{
+  "address": "3rzgKqvEkhJiWivtTNg5WjSkFi8T4pNaQECWCssc8pAU",
+  "metadata": {
+    "name": "viex_treasury",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "VIEX Treasury: Cross-border multi-currency stablecoin treasury with KYC, AML, Travel Rule, and FX conversion"
+  },
+  "instructions": [
+    {
+      "name": "accept_authority",
+      "discriminator": [
+        107,
+        86,
+        198,
+        91,
+        33,
+        12,
+        107,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "new_authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "add_to_allowlist",
+      "discriminator": [
+        149,
+        143,
+        78,
+        134,
+        241,
+        244,
+        7,
+        56
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "allowlist_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "target"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "add_to_blacklist",
+      "discriminator": [
+        90,
+        115,
+        98,
+        231,
+        173,
+        119,
+        117,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "blacklist_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  97,
+                  99,
+                  107,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "target"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  97,
+                  99,
+                  107,
+                  108,
+                  105,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "assign_role",
+      "discriminator": [
+        255,
+        174,
+        125,
+        180,
+        203,
+        155,
+        202,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "assignee"
+        },
+        {
+          "name": "role_assignment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "arg",
+                "path": "role"
+              },
+              {
+                "kind": "account",
+                "path": "assignee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter_info",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114,
+                  95,
+                  105,
+                  110,
+                  102,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "assignee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "role",
+          "type": {
+            "defined": {
+              "name": "Role"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "attach_travel_rule",
+      "discriminator": [
+        13,
+        194,
+        147,
+        119,
+        175,
+        51,
+        221,
+        220
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury.authority",
+                "account": "Treasury"
+              }
+            ]
+          }
+        },
+        {
+          "name": "source_mint"
+        },
+        {
+          "name": "originator"
+        },
+        {
+          "name": "beneficiary"
+        },
+        {
+          "name": "travel_rule_message",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  97,
+                  118,
+                  101,
+                  108,
+                  95,
+                  114,
+                  117,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "arg",
+                "path": "sig_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "transfer_signature",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
+        },
+        {
+          "name": "sig_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "originator_name",
+          "type": "string"
+        },
+        {
+          "name": "originator_vasp",
+          "type": "string"
+        },
+        {
+          "name": "beneficiary_name",
+          "type": "string"
+        },
+        {
+          "name": "beneficiary_vasp",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "burn_tokens",
+      "discriminator": [
+        76,
+        15,
+        51,
+        254,
+        229,
+        215,
+        121,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "burner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  110,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "burner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "burner_token_account",
+          "writable": true
+        },
+        {
+          "name": "oracle_config",
+          "optional": true
+        },
+        {
+          "name": "price_feed",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "close_blacklist_entry",
+      "discriminator": [
+        72,
+        4,
+        209,
+        30,
+        100,
+        165,
+        217,
+        216
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "blacklist_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  97,
+                  99,
+                  107,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "blacklist_entry.address",
+                "account": "BlacklistEntry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  97,
+                  99,
+                  107,
+                  108,
+                  105,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_role",
+      "discriminator": [
+        139,
+        108,
+        157,
+        18,
+        175,
+        150,
+        155,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          },
+          "relations": [
+            "role_assignment"
+          ]
+        },
+        {
+          "name": "role_assignment",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_travel_rule",
+      "discriminator": [
+        79,
+        211,
+        206,
+        241,
+        63,
+        37,
+        73,
+        211
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury.authority",
+                "account": "Treasury"
+              }
+            ]
+          },
+          "relations": [
+            "travel_rule_message"
+          ]
+        },
+        {
+          "name": "travel_rule_message",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "configure_fx_pair",
+      "discriminator": [
+        188,
+        130,
+        123,
+        21,
+        191,
+        141,
+        152,
+        78
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "source_mint"
+        },
+        {
+          "name": "dest_mint"
+        },
+        {
+          "name": "fx_pair_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  120,
+                  95,
+                  112,
+                  97,
+                  105,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "account",
+                "path": "source_mint"
+              },
+              {
+                "kind": "account",
+                "path": "dest_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "price_feed",
+          "type": "pubkey"
+        },
+        {
+          "name": "max_staleness_secs",
+          "type": "u64"
+        },
+        {
+          "name": "max_slippage_bps",
+          "type": "u16"
+        },
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "configure_oracle",
+      "discriminator": [
+        245,
+        58,
+        202,
+        16,
+        204,
+        36,
+        82,
+        199
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "stablecoin"
+          ]
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "oracle_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  97,
+                  99,
+                  108,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "price_feed",
+          "type": "pubkey"
+        },
+        {
+          "name": "max_deviation_bps",
+          "type": "u16"
+        },
+        {
+          "name": "max_staleness_secs",
+          "type": "u64"
+        },
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "convert",
+      "discriminator": [
+        122,
+        80,
+        212,
+        208,
+        92,
+        200,
+        34,
+        161
+      ],
+      "accounts": [
+        {
+          "name": "converter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury.authority",
+                "account": "Treasury"
+              }
+            ]
+          }
+        },
+        {
+          "name": "source_stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "source_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dest_stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dest_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "source_mint",
+          "writable": true
+        },
+        {
+          "name": "dest_mint",
+          "writable": true
+        },
+        {
+          "name": "converter_source_account",
+          "writable": true
+        },
+        {
+          "name": "converter_dest_account",
+          "writable": true
+        },
+        {
+          "name": "fx_pair_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  120,
+                  95,
+                  112,
+                  97,
+                  105,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "account",
+                "path": "source_mint"
+              },
+              {
+                "kind": "account",
+                "path": "dest_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_feed"
+        },
+        {
+          "name": "source_token_program"
+        },
+        {
+          "name": "dest_token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "source_amount",
+          "type": "u64"
+        },
+        {
+          "name": "min_dest_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "freeze_account",
+      "discriminator": [
+        253,
+        75,
+        82,
+        133,
+        167,
+        238,
+        43,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_account",
+          "writable": true
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "init_treasury",
+      "discriminator": [
+        105,
+        152,
+        173,
+        51,
+        158,
+        151,
+        49,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "base_currency",
+          "type": "string"
+        },
+        {
+          "name": "travel_rule_threshold",
+          "type": "u64"
+        },
+        {
+          "name": "kyc_required",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_hook_program",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "decimals",
+          "type": "u8"
+        },
+        {
+          "name": "config",
+          "type": {
+            "defined": {
+              "name": "StablecoinInitConfig"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "kyc_approve",
+      "discriminator": [
+        33,
+        226,
+        84,
+        95,
+        254,
+        251,
+        68,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "kyc_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "account",
+                "path": "target"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "kyc_level",
+          "type": "u8"
+        },
+        {
+          "name": "jurisdiction",
+          "type": {
+            "array": [
+              "u8",
+              3
+            ]
+          }
+        },
+        {
+          "name": "provider",
+          "type": "string"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "kyc_close",
+      "discriminator": [
+        95,
+        55,
+        51,
+        63,
+        94,
+        138,
+        170,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "kyc_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "account",
+                "path": "kyc_entry.address",
+                "account": "KycEntry"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "kyc_revoke",
+      "discriminator": [
+        27,
+        217,
+        8,
+        144,
+        155,
+        195,
+        204,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "kyc_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "treasury"
+              },
+              {
+                "kind": "account",
+                "path": "kyc_entry.address",
+                "account": "KycEntry"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint_tokens",
+      "discriminator": [
+        59,
+        132,
+        24,
+        246,
+        122,
+        39,
+        8,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "minter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "minter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter_info",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  101,
+                  114,
+                  95,
+                  105,
+                  110,
+                  102,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "minter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true
+        },
+        {
+          "name": "oracle_config",
+          "optional": true
+        },
+        {
+          "name": "price_feed",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "nominate_authority",
+      "discriminator": [
+        148,
+        182,
+        144,
+        91,
+        186,
+        12,
+        118,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "pause",
+      "discriminator": [
+        211,
+        22,
+        221,
+        251,
+        74,
+        121,
+        193,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "register_mint",
+      "discriminator": [
+        242,
+        43,
+        74,
+        162,
+        217,
+        214,
+        191,
+        171
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stablecoin"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "remove_from_allowlist",
+      "discriminator": [
+        45,
+        46,
+        214,
+        56,
+        189,
+        77,
+        242,
+        227
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "allowlist_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "account",
+                "path": "allowlist_entry.address",
+                "account": "AllowlistEntry"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "remove_from_blacklist",
+      "discriminator": [
+        47,
+        105,
+        20,
+        10,
+        165,
+        168,
+        203,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "blacklist_entry",
+          "writable": true
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  97,
+                  99,
+                  107,
+                  108,
+                  105,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "remove_fx_pair",
+      "discriminator": [
+        137,
+        226,
+        98,
+        41,
+        99,
+        231,
+        68,
+        171
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "treasury"
+          ]
+        },
+        {
+          "name": "treasury",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          },
+          "relations": [
+            "fx_pair_config"
+          ]
+        },
+        {
+          "name": "fx_pair_config",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "revoke_role",
+      "discriminator": [
+        179,
+        232,
+        2,
+        180,
+        48,
+        227,
+        82,
+        7
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role_assignment",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "seize",
+      "discriminator": [
+        129,
+        159,
+        143,
+        31,
+        161,
+        224,
+        241,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "source_token_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_token_account",
+          "writable": true
+        },
+        {
+          "name": "blacklist_entry"
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  105,
+                  122,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_supply_cap",
+      "discriminator": [
+        26,
+        229,
+        174,
+        213,
+        12,
+        59,
+        220,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "supply_cap",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "thaw_account",
+      "discriminator": [
+        115,
+        152,
+        79,
+        213,
+        213,
+        169,
+        184,
+        35
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_account",
+          "writable": true
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "transfer_authority",
+      "discriminator": [
+        48,
+        169,
+        76,
+        72,
+        229,
+        180,
+        55,
+        161
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "unpause",
+      "discriminator": [
+        169,
+        144,
+        4,
+        38,
+        10,
+        141,
+        188,
+        255
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "role_assignment",
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_metadata",
+      "discriminator": [
+        170,
+        182,
+        43,
+        239,
+        97,
+        78,
+        225,
+        186
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "stablecoin"
+          ]
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_minter_quota",
+      "discriminator": [
+        221,
+        28,
+        229,
+        118,
+        214,
+        28,
+        220,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "stablecoin",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  98,
+                  108,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stablecoin.mint",
+                "account": "Stablecoin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "minter_info",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_quota",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AllowlistEntry",
+      "discriminator": [
+        42,
+        59,
+        88,
+        1,
+        124,
+        138,
+        92,
+        236
+      ]
+    },
+    {
+      "name": "BlacklistEntry",
+      "discriminator": [
+        218,
+        179,
+        231,
+        40,
+        141,
+        25,
+        168,
+        189
+      ]
+    },
+    {
+      "name": "FxPairConfig",
+      "discriminator": [
+        97,
+        140,
+        45,
+        187,
+        110,
+        107,
+        65,
+        244
+      ]
+    },
+    {
+      "name": "KycEntry",
+      "discriminator": [
+        43,
+        113,
+        165,
+        70,
+        7,
+        3,
+        232,
+        8
+      ]
+    },
+    {
+      "name": "MinterInfo",
+      "discriminator": [
+        158,
+        4,
+        176,
+        199,
+        251,
+        15,
+        209,
+        131
+      ]
+    },
+    {
+      "name": "OracleConfig",
+      "discriminator": [
+        133,
+        196,
+        152,
+        50,
+        27,
+        21,
+        145,
+        254
+      ]
+    },
+    {
+      "name": "RoleAssignment",
+      "discriminator": [
+        205,
+        130,
+        191,
+        231,
+        211,
+        225,
+        155,
+        246
+      ]
+    },
+    {
+      "name": "Stablecoin",
+      "discriminator": [
+        253,
+        100,
+        162,
+        223,
+        228,
+        151,
+        56,
+        155
+      ]
+    },
+    {
+      "name": "TravelRuleMessage",
+      "discriminator": [
+        191,
+        52,
+        110,
+        78,
+        7,
+        61,
+        185,
+        65
+      ]
+    },
+    {
+      "name": "Treasury",
+      "discriminator": [
+        238,
+        239,
+        123,
+        238,
+        89,
+        1,
+        168,
+        253
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AccountFrozen",
+      "discriminator": [
+        221,
+        214,
+        59,
+        29,
+        246,
+        50,
+        119,
+        206
+      ]
+    },
+    {
+      "name": "AccountThawed",
+      "discriminator": [
+        49,
+        63,
+        73,
+        105,
+        129,
+        190,
+        40,
+        119
+      ]
+    },
+    {
+      "name": "AllowlistAdded",
+      "discriminator": [
+        102,
+        147,
+        146,
+        236,
+        103,
+        153,
+        16,
+        151
+      ]
+    },
+    {
+      "name": "AllowlistRemoved",
+      "discriminator": [
+        47,
+        69,
+        78,
+        173,
+        196,
+        109,
+        163,
+        172
+      ]
+    },
+    {
+      "name": "AuthorityNominated",
+      "discriminator": [
+        83,
+        253,
+        94,
+        222,
+        179,
+        41,
+        95,
+        127
+      ]
+    },
+    {
+      "name": "AuthorityTransferred",
+      "discriminator": [
+        245,
+        109,
+        179,
+        54,
+        135,
+        92,
+        22,
+        64
+      ]
+    },
+    {
+      "name": "BlacklistAdded",
+      "discriminator": [
+        214,
+        13,
+        214,
+        145,
+        233,
+        250,
+        4,
+        236
+      ]
+    },
+    {
+      "name": "BlacklistEntryClosed",
+      "discriminator": [
+        119,
+        58,
+        190,
+        89,
+        137,
+        89,
+        178,
+        147
+      ]
+    },
+    {
+      "name": "BlacklistRemoved",
+      "discriminator": [
+        56,
+        84,
+        216,
+        61,
+        23,
+        245,
+        29,
+        236
+      ]
+    },
+    {
+      "name": "CurrencyConverted",
+      "discriminator": [
+        153,
+        197,
+        144,
+        6,
+        173,
+        220,
+        149,
+        214
+      ]
+    },
+    {
+      "name": "FxPairConfigured",
+      "discriminator": [
+        46,
+        82,
+        250,
+        233,
+        88,
+        136,
+        149,
+        225
+      ]
+    },
+    {
+      "name": "FxPairRemoved",
+      "discriminator": [
+        124,
+        182,
+        229,
+        156,
+        231,
+        30,
+        251,
+        213
+      ]
+    },
+    {
+      "name": "KycApproved",
+      "discriminator": [
+        227,
+        219,
+        154,
+        170,
+        3,
+        168,
+        249,
+        2
+      ]
+    },
+    {
+      "name": "KycEntryClosed",
+      "discriminator": [
+        88,
+        72,
+        129,
+        99,
+        128,
+        249,
+        150,
+        32
+      ]
+    },
+    {
+      "name": "KycRevoked",
+      "discriminator": [
+        205,
+        46,
+        180,
+        9,
+        213,
+        21,
+        197,
+        62
+      ]
+    },
+    {
+      "name": "MetadataUpdated",
+      "discriminator": [
+        132,
+        36,
+        215,
+        246,
+        166,
+        90,
+        189,
+        44
+      ]
+    },
+    {
+      "name": "MintRegistered",
+      "discriminator": [
+        91,
+        135,
+        88,
+        182,
+        239,
+        182,
+        5,
+        85
+      ]
+    },
+    {
+      "name": "OracleConfigured",
+      "discriminator": [
+        111,
+        102,
+        175,
+        86,
+        180,
+        219,
+        55,
+        79
+      ]
+    },
+    {
+      "name": "Paused",
+      "discriminator": [
+        172,
+        248,
+        5,
+        253,
+        49,
+        255,
+        255,
+        232
+      ]
+    },
+    {
+      "name": "RoleAssigned",
+      "discriminator": [
+        15,
+        207,
+        225,
+        171,
+        169,
+        117,
+        98,
+        131
+      ]
+    },
+    {
+      "name": "RoleClosed",
+      "discriminator": [
+        104,
+        151,
+        154,
+        97,
+        124,
+        28,
+        148,
+        108
+      ]
+    },
+    {
+      "name": "RoleRevoked",
+      "discriminator": [
+        167,
+        183,
+        52,
+        229,
+        126,
+        206,
+        62,
+        61
+      ]
+    },
+    {
+      "name": "StablecoinInitialized",
+      "discriminator": [
+        238,
+        217,
+        135,
+        14,
+        147,
+        33,
+        221,
+        169
+      ]
+    },
+    {
+      "name": "SupplyCapUpdated",
+      "discriminator": [
+        162,
+        231,
+        73,
+        4,
+        93,
+        188,
+        91,
+        148
+      ]
+    },
+    {
+      "name": "TokensBurned",
+      "discriminator": [
+        230,
+        255,
+        34,
+        113,
+        226,
+        53,
+        227,
+        9
+      ]
+    },
+    {
+      "name": "TokensMinted",
+      "discriminator": [
+        207,
+        212,
+        128,
+        194,
+        175,
+        54,
+        64,
+        24
+      ]
+    },
+    {
+      "name": "TokensSeized",
+      "discriminator": [
+        51,
+        129,
+        131,
+        114,
+        206,
+        234,
+        140,
+        122
+      ]
+    },
+    {
+      "name": "TravelRuleAttached",
+      "discriminator": [
+        47,
+        97,
+        155,
+        82,
+        214,
+        176,
+        132,
+        81
+      ]
+    },
+    {
+      "name": "TravelRuleClosed",
+      "discriminator": [
+        74,
+        67,
+        29,
+        98,
+        128,
+        38,
+        122,
+        166
+      ]
+    },
+    {
+      "name": "TreasuryCreated",
+      "discriminator": [
+        190,
+        59,
+        58,
+        105,
+        76,
+        234,
+        21,
+        199
+      ]
+    },
+    {
+      "name": "Unpaused",
+      "discriminator": [
+        156,
+        150,
+        47,
+        174,
+        120,
+        216,
+        93,
+        117
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Paused",
+      "msg": "Stablecoin is paused"
+    },
+    {
+      "code": 6001,
+      "name": "Unauthorized",
+      "msg": "Not authorized"
+    },
+    {
+      "code": 6002,
+      "name": "Blacklisted",
+      "msg": "Address is blacklisted"
+    },
+    {
+      "code": 6003,
+      "name": "Frozen",
+      "msg": "Account is frozen"
+    },
+    {
+      "code": 6004,
+      "name": "MinterQuotaExceeded",
+      "msg": "Minter quota exceeded"
+    },
+    {
+      "code": 6005,
+      "name": "SupplyCapExceeded",
+      "msg": "Supply cap exceeded"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidName",
+      "msg": "Invalid name length"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidSymbol",
+      "msg": "Invalid symbol length"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidUri",
+      "msg": "Invalid URI length"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidDecimals",
+      "msg": "Invalid decimals"
+    },
+    {
+      "code": 6010,
+      "name": "ComplianceNotEnabled",
+      "msg": "Compliance not enabled on this stablecoin"
+    },
+    {
+      "code": 6011,
+      "name": "AllowlistNotEnabled",
+      "msg": "Allowlist not enabled on this stablecoin"
+    },
+    {
+      "code": 6012,
+      "name": "AlreadyBlacklisted",
+      "msg": "Already blacklisted"
+    },
+    {
+      "code": 6013,
+      "name": "NotBlacklisted",
+      "msg": "Not blacklisted"
+    },
+    {
+      "code": 6014,
+      "name": "AlreadyOnAllowlist",
+      "msg": "Already on allowlist"
+    },
+    {
+      "code": 6015,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidAuthority",
+      "msg": "Invalid authority"
+    },
+    {
+      "code": 6017,
+      "name": "NoPendingAuthority",
+      "msg": "Authority transfer not pending"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidPendingAuthority",
+      "msg": "Invalid pending authority"
+    },
+    {
+      "code": 6019,
+      "name": "ReasonTooLong",
+      "msg": "Reason too long"
+    },
+    {
+      "code": 6020,
+      "name": "OraclePriceStale",
+      "msg": "Oracle price is stale"
+    },
+    {
+      "code": 6021,
+      "name": "OraclePriceDepegged",
+      "msg": "Oracle price deviates from peg"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidOracleAccount",
+      "msg": "Invalid oracle account"
+    },
+    {
+      "code": 6023,
+      "name": "TreasuryAlreadyInitialized",
+      "msg": "Treasury already initialized"
+    },
+    {
+      "code": 6024,
+      "name": "MintNotInTreasury",
+      "msg": "Mint not registered in treasury"
+    },
+    {
+      "code": 6025,
+      "name": "TreasuryFull",
+      "msg": "Treasury full — maximum mints reached"
+    },
+    {
+      "code": 6026,
+      "name": "MintAlreadyRegistered",
+      "msg": "Mint already registered in treasury"
+    },
+    {
+      "code": 6027,
+      "name": "SameCurrencyConversion",
+      "msg": "Same currency conversion not allowed"
+    },
+    {
+      "code": 6028,
+      "name": "FxRateStale",
+      "msg": "FX rate is stale"
+    },
+    {
+      "code": 6029,
+      "name": "FxSlippageExceeded",
+      "msg": "FX slippage exceeds maximum"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidFxRate",
+      "msg": "Invalid FX rate"
+    },
+    {
+      "code": 6031,
+      "name": "KycNotApproved",
+      "msg": "KYC not approved"
+    },
+    {
+      "code": 6032,
+      "name": "KycExpired",
+      "msg": "KYC expired"
+    },
+    {
+      "code": 6033,
+      "name": "KycLevelInsufficient",
+      "msg": "KYC level insufficient"
+    },
+    {
+      "code": 6034,
+      "name": "InvalidKycLevel",
+      "msg": "Invalid KYC level"
+    },
+    {
+      "code": 6035,
+      "name": "InvalidJurisdiction",
+      "msg": "Invalid jurisdiction code"
+    },
+    {
+      "code": 6036,
+      "name": "TravelRuleRequired",
+      "msg": "Travel rule data required for this transfer amount"
+    },
+    {
+      "code": 6037,
+      "name": "OriginatorNameRequired",
+      "msg": "Originator name required"
+    },
+    {
+      "code": 6038,
+      "name": "BeneficiaryNameRequired",
+      "msg": "Beneficiary name required"
+    },
+    {
+      "code": 6039,
+      "name": "VaspIdRequired",
+      "msg": "VASP ID required"
+    },
+    {
+      "code": 6040,
+      "name": "TravelRuleDataTooLong",
+      "msg": "Travel rule data too long"
+    },
+    {
+      "code": 6041,
+      "name": "AccountStillActive",
+      "msg": "Account is still active — deactivate before closing"
+    }
+  ],
+  "types": [
+    {
+      "name": "AccountFrozen",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "account",
+            "type": "pubkey"
+          },
+          {
+            "name": "frozen_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountThawed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "account",
+            "type": "pubkey"
+          },
+          {
+            "name": "thawed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllowlistAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "added_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllowlistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stablecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "added_at",
+            "type": "i64"
+          },
+          {
+            "name": "added_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllowlistRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "removed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuthorityNominated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "nominated_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuthorityTransferred",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BlacklistAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "added_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BlacklistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stablecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "blacklisted_at",
+            "type": "i64"
+          },
+          {
+            "name": "blacklisted_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BlacklistEntryClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "closed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BlacklistRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "removed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurrencyConverted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dest_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "source_amount",
+            "type": "u64"
+          },
+          {
+            "name": "dest_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fx_rate",
+            "type": "i64"
+          },
+          {
+            "name": "fx_expo",
+            "type": "i32"
+          },
+          {
+            "name": "converted_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FxPairConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dest_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "price_feed",
+            "type": "pubkey"
+          },
+          {
+            "name": "max_staleness_secs",
+            "type": "u64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          },
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FxPairConfigured",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dest_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "price_feed",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FxPairRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dest_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "closed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycApproved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "kyc_level",
+            "type": "u8"
+          },
+          {
+            "name": "jurisdiction",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            }
+          },
+          {
+            "name": "provider",
+            "type": "string"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "approved_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "kyc_level",
+            "type": {
+              "defined": {
+                "name": "KycLevel"
+              }
+            }
+          },
+          {
+            "name": "jurisdiction",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            }
+          },
+          {
+            "name": "provider",
+            "type": "string"
+          },
+          {
+            "name": "approved_at",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "approved_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "_reserved",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycEntryClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "closed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycLevel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Basic"
+          },
+          {
+            "name": "Enhanced"
+          },
+          {
+            "name": "Institutional"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MetadataUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "updated_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MinterInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stablecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "minter",
+            "type": "pubkey"
+          },
+          {
+            "name": "quota",
+            "type": "u64"
+          },
+          {
+            "name": "minted",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stablecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "price_feed",
+            "type": "pubkey"
+          },
+          {
+            "name": "max_deviation_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_staleness_secs",
+            "type": "u64"
+          },
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleConfigured",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "price_feed",
+            "type": "pubkey"
+          },
+          {
+            "name": "max_deviation_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_staleness_secs",
+            "type": "u64"
+          },
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Paused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "paused_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Minter"
+          },
+          {
+            "name": "Burner"
+          },
+          {
+            "name": "Blacklister"
+          },
+          {
+            "name": "Pauser"
+          },
+          {
+            "name": "Seizer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleAssigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "assignee",
+            "type": "pubkey"
+          },
+          {
+            "name": "assigned_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleAssignment",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stablecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "defined": {
+                "name": "Role"
+              }
+            }
+          },
+          {
+            "name": "assignee",
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "granted_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "granted_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "assignee",
+            "type": "pubkey"
+          },
+          {
+            "name": "closed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "assignee",
+            "type": "pubkey"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Stablecoin",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "enable_permanent_delegate",
+            "type": "bool"
+          },
+          {
+            "name": "enable_transfer_hook",
+            "type": "bool"
+          },
+          {
+            "name": "enable_allowlist",
+            "type": "bool"
+          },
+          {
+            "name": "total_minted",
+            "type": "u64"
+          },
+          {
+            "name": "total_burned",
+            "type": "u64"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          },
+          {
+            "name": "pending_authority",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "_reserved",
+            "type": {
+              "array": [
+                "u8",
+                23
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StablecoinInitConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enable_permanent_delegate",
+            "type": "bool"
+          },
+          {
+            "name": "enable_transfer_hook",
+            "type": "bool"
+          },
+          {
+            "name": "enable_allowlist",
+            "type": "bool"
+          },
+          {
+            "name": "enable_default_account_state",
+            "type": "bool"
+          },
+          {
+            "name": "enable_confidential_transfer",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StablecoinInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SupplyCapUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_cap",
+            "type": "u64"
+          },
+          {
+            "name": "updated_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "burner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "minter",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensSeized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "from",
+            "type": "pubkey"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "seized_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TravelRuleAttached",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "transfer_signature",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "originator_name",
+            "type": "string"
+          },
+          {
+            "name": "originator_vasp",
+            "type": "string"
+          },
+          {
+            "name": "beneficiary_name",
+            "type": "string"
+          },
+          {
+            "name": "beneficiary_vasp",
+            "type": "string"
+          },
+          {
+            "name": "created_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TravelRuleClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "transfer_signature",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "closed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TravelRuleMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "transfer_signature",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "source_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "originator_name",
+            "type": "string"
+          },
+          {
+            "name": "originator_vasp",
+            "type": "string"
+          },
+          {
+            "name": "originator_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary_name",
+            "type": "string"
+          },
+          {
+            "name": "beneficiary_vasp",
+            "type": "string"
+          },
+          {
+            "name": "beneficiary_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "created_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Treasury",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "mints",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "base_currency",
+            "type": "string"
+          },
+          {
+            "name": "travel_rule_threshold",
+            "type": "u64"
+          },
+          {
+            "name": "kyc_required",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "_reserved",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TreasuryCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "base_currency",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Unpaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "unpaused_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Toast from "./components/Toast";
@@ -16,28 +16,41 @@ import Holders from "./pages/Holders";
 import FreezeThaw from "./pages/FreezeThaw";
 import Pause from "./pages/Pause";
 
+function PageTransition({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-enter">
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-dark-900">
+      <div className="flex h-screen bg-navy-950 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-          <main className="flex-1 overflow-y-auto p-6">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/initialize" element={<Initialize />} />
-              <Route path="/mint-burn" element={<MintBurn />} />
-              <Route path="/convert" element={<Convert />} />
-              <Route path="/compliance" element={<Compliance />} />
-              <Route path="/kyc" element={<Kyc />} />
-              <Route path="/travel-rule" element={<TravelRule />} />
-              <Route path="/roles" element={<Roles />} />
-              <Route path="/authority" element={<Authority />} />
-              <Route path="/holders" element={<Holders />} />
-              <Route path="/freeze-thaw" element={<FreezeThaw />} />
-              <Route path="/pause" element={<Pause />} />
-            </Routes>
+          <main className="flex-1 overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-6 py-6">
+              <PageTransition>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/initialize" element={<Initialize />} />
+                  <Route path="/mint-burn" element={<MintBurn />} />
+                  <Route path="/convert" element={<Convert />} />
+                  <Route path="/compliance" element={<Compliance />} />
+                  <Route path="/kyc" element={<Kyc />} />
+                  <Route path="/travel-rule" element={<TravelRule />} />
+                  <Route path="/roles" element={<Roles />} />
+                  <Route path="/authority" element={<Authority />} />
+                  <Route path="/holders" element={<Holders />} />
+                  <Route path="/freeze-thaw" element={<FreezeThaw />} />
+                  <Route path="/pause" element={<Pause />} />
+                </Routes>
+              </PageTransition>
+            </div>
           </main>
         </div>
       </div>

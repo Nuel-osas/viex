@@ -17,6 +17,8 @@ import "./index.css";
 const endpoint = clusterApiUrl("devnet");
 const wallets = [new PhantomWalletAdapter()];
 
+document.title = "VIEX | Cross-Border Stablecoin Treasury";
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ConnectionProvider endpoint={endpoint}>

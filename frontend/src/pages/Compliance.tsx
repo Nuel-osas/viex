@@ -7,7 +7,7 @@ import { PublicKey } from "@solana/web3.js";
 type Tab = "blacklist" | "seize";
 
 export default function Compliance() {
-  const { treasury, stablecoins, addToBlacklist, removeFromBlacklist, closeBlacklistEntry, seize } = useViex();
+  const { treasury, stablecoins, addToBlacklist, removeFromBlacklist, closeBlacklistEntry, seize, isBlacklisted } = useViex();
   const { addToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<Tab>("blacklist");
@@ -89,12 +89,11 @@ export default function Compliance() {
   const handleCheckStatus = async () => {
     setCheckLoading(true);
     try {
-      // Attempt to fetch the blacklist PDA -- if it exists, the address is blacklisted
-      // For now, we do a simple try/catch since there's no direct fetch in the hook
-      // We'll try addToBlacklist logic path or just show the check UI
-      setCheckResult("clear"); // placeholder
+      const result = await isBlacklisted(new PublicKey(checkMint), new PublicKey(checkTarget));
+      setCheckResult(result ? "blacklisted" : "clear");
       addToast("info", "Status Check", "Check completed -- see result below");
-    } catch {
+    } catch (err) {
+      addToast("error", "Failed", parseError(err));
       setCheckResult(null);
     } finally {
       setCheckLoading(false);

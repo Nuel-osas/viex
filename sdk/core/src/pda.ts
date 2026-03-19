@@ -97,13 +97,18 @@ export function findKycPDA(
   );
 }
 
+/**
+ * Find PDA for a TravelRuleMessage account.
+ * @param sigHash - Must be a 32-byte SHA256 hash of the 64-byte transfer signature.
+ *                  The on-chain program uses this hash as the PDA seed (max seed = 32 bytes).
+ */
 export function findTravelRulePDA(
   treasury: PublicKey,
-  transferSignature: Uint8Array | number[],
+  sigHash: Uint8Array | number[],
   programId: PublicKey = VIEX_TREASURY_PROGRAM_ID
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [TRAVEL_RULE_SEED, treasury.toBuffer(), Buffer.from(transferSignature)],
+    [TRAVEL_RULE_SEED, treasury.toBuffer(), Buffer.from(sigHash)],
     programId
   );
 }

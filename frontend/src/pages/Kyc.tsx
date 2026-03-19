@@ -56,6 +56,7 @@ export default function Kyc() {
   const [checkTarget, setCheckTarget] = useState("");
   const [checkResult, setCheckResult] = useState<any>(null);
   const [checkLoading, setCheckLoading] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
 
   const handleApprove = async () => {
     setApproveLoading(true);
@@ -63,7 +64,7 @@ export default function Kyc() {
       const jurisdictionBytes = jurisdiction.split("").map((c) => c.charCodeAt(0)).slice(0, 3);
       while (jurisdictionBytes.length < 3) jurisdictionBytes.push(0);
       const expiryTimestamp = expiry ? Math.floor(new Date(expiry).getTime() / 1000) : Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
-      const tx = await kycApprove(new PublicKey(target), parseInt(kycLevel), jurisdictionBytes, provider, expiryTimestamp);
+      const tx = await kycApprove(new PublicKey(target), Math.floor(Number(kycLevel) || 0), jurisdictionBytes, provider, expiryTimestamp);
       addToast("success", "KYC Approved", `KYC approved for ${target.slice(0, 12)}...`, tx);
       setTarget("");
     } catch (err) {
@@ -112,6 +113,7 @@ export default function Kyc() {
       setCheckResult(null);
     } finally {
       setCheckLoading(false);
+      setHasChecked(true);
     }
   };
 
@@ -249,7 +251,7 @@ export default function Kyc() {
 
             <button
               onClick={handleApprove}
-              disabled={!target || !provider || approveLoading}
+              disabled={!target || !provider || jurisdiction.length !== 3 || approveLoading}
               className="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {approveLoading ? (
@@ -410,7 +412,7 @@ export default function Kyc() {
             </div>
           )}
 
-          {checkResult === null && checkTarget && !checkLoading && (
+          {hasChecked && checkResult === null && !checkLoading && (
             <div className="mt-6 p-5 rounded-xl bg-gray-800/30 border border-gray-700 text-center">
               <p className="text-gray-500 text-sm">No KYC entry found for this address</p>
             </div>

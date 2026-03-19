@@ -66,7 +66,18 @@ export default function Header() {
             <span className="text-xs text-gray-400 font-mono">{truncatedAddress}</span>
           </div>
         )}
-        <WalletMultiButton />
+        <WalletMultiButton
+          style={{
+            background: "linear-gradient(135deg, #059669, #10b981)",
+            height: "38px",
+            fontSize: "13px",
+            borderRadius: "10px",
+            padding: "0 18px",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 500,
+            border: "none",
+          }}
+        />
       </div>
 
       {/* Bottom gradient border */}

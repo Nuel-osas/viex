@@ -22,8 +22,8 @@ function truncateAddress(addr: string, chars = 4): string {
 }
 
 function deriveComplianceLevel(sc: StablecoinState): "SSS-1" | "SSS-2" | "SSS-3" {
-  if (sc.enableTransferHook && sc.enablePermanentDelegate) return "SSS-3";
-  if (sc.enableTransferHook) return "SSS-2";
+  if (sc.enableAllowlist) return "SSS-3";
+  if (sc.enableTransferHook && !sc.enableAllowlist) return "SSS-2";
   return "SSS-1";
 }
 

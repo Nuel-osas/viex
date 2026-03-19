@@ -45,7 +45,7 @@ export default function TravelRule() {
         new PublicKey(beneficiary),
         sigBytes,
         hashBytes,
-        parseInt(amount),
+        Math.floor(Number(amount) || 0),
         originatorName,
         originatorVasp,
         beneficiaryName,
@@ -192,7 +192,7 @@ export default function TravelRule() {
 
         <button
           onClick={handleAttach}
-          disabled={!sourceMint || !originator || !beneficiary || !amount || !originatorName || !beneficiaryName || attachLoading}
+          disabled={!sourceMint || !originator || !beneficiary || !amount || !originatorName || !beneficiaryName || !txSig || !originatorVasp || !beneficiaryVasp || attachLoading}
           className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {attachLoading ? (

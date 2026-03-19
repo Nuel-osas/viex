@@ -39,8 +39,8 @@ export default function Convert() {
         new PublicKey(fxSourceMint),
         new PublicKey(fxDestMint),
         new PublicKey(fxPriceFeed),
-        parseInt(fxStaleness),
-        parseInt(fxSlippage),
+        Math.floor(Number(fxStaleness) || 0),
+        Math.floor(Number(fxSlippage) || 0),
         fxEnabled
       );
       addToast("success", "FX Pair Configured", "Price feed linked", tx);
@@ -54,11 +54,14 @@ export default function Convert() {
   const handleConvert = async () => {
     setConvertLoading(true);
     try {
+      const parsedSourceAmount = Math.floor(Number(sourceAmount) || 0);
+      const parsedSlippage = Math.floor(Number(slippageBps) || 0);
+      const calculatedMin = Math.floor(Number(minDestAmount) || 0) || Math.floor(parsedSourceAmount * (10000 - parsedSlippage) / 10000);
       const tx = await convert(
         new PublicKey(sourceMint),
         new PublicKey(destMint),
-        parseInt(sourceAmount),
-        parseInt(minDestAmount),
+        parsedSourceAmount,
+        calculatedMin,
         new PublicKey(priceFeed)
       );
       addToast("success", "Converted", "FX conversion successful", tx);
@@ -195,7 +198,7 @@ export default function Convert() {
 
         <button
           onClick={handleConvert}
-          disabled={!sourceMint || !destMint || !sourceAmount || !minDestAmount || !priceFeed || convertLoading}
+          disabled={!sourceMint || !destMint || !sourceAmount || !priceFeed || convertLoading}
           className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {convertLoading ? (

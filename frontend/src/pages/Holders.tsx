@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import { useViex } from "../hooks/useViex";
+import { useToast } from "../components/Toast";
+import { parseError } from "../utils/errors";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
@@ -14,6 +16,7 @@ interface TokenHolder {
 
 export default function Holders() {
   const { treasury, stablecoins } = useViex();
+  const { addToast } = useToast();
   const { connection } = useConnection();
 
   const [selectedMint, setSelectedMint] = useState("");
@@ -55,7 +58,7 @@ export default function Holders() {
 
       setHolders(parsed.sort((a, b) => b.rawAmount - a.rawAmount));
     } catch (err) {
-      console.error("Failed to fetch holders:", err);
+      addToast("error", "Fetch Failed", parseError(err));
       setHolders([]);
     } finally {
       setLoading(false);

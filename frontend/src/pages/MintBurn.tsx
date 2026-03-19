@@ -44,7 +44,7 @@ export default function MintBurn() {
   const handleMint = async () => {
     setMintLoading(true);
     try {
-      const tx = await mintTokens(new PublicKey(selectedMint), parseInt(mintAmount), new PublicKey(recipient));
+      const tx = await mintTokens(new PublicKey(selectedMint), Math.floor(Number(mintAmount) || 0), new PublicKey(recipient));
       addToast("success", "Tokens Minted", `${mintAmount} tokens minted`, tx);
       setMintAmount("");
     } catch (err) {
@@ -57,7 +57,7 @@ export default function MintBurn() {
   const handleBurn = async () => {
     setBurnLoading(true);
     try {
-      const tx = await burnTokens(new PublicKey(burnMint), parseInt(burnAmount));
+      const tx = await burnTokens(new PublicKey(burnMint), Math.floor(Number(burnAmount) || 0));
       addToast("success", "Tokens Burned", `${burnAmount} tokens burned`, tx);
       setBurnAmount("");
     } catch (err) {

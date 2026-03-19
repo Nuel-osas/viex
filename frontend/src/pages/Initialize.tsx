@@ -104,7 +104,7 @@ export default function Initialize() {
     if (!validate({ treasuryName })) return;
     setTreasuryLoading(true);
     try {
-      const tx = await initTreasury(treasuryName, baseCurrency, parseInt(threshold), kycRequired);
+      const tx = await initTreasury(treasuryName, baseCurrency, Math.floor(Number(threshold) || 0), kycRequired);
       addToast("success", "Treasury Created", `Treasury "${treasuryName}" initialized`, tx);
       setCurrentStep(2);
     } catch (err) {
@@ -119,7 +119,7 @@ export default function Initialize() {
     setCoinLoading(true);
     try {
       const preset = SSS_PRESETS[selectedPreset];
-      const result = await initStablecoin(coinName, coinSymbol, coinUri || "", parseInt(coinDecimals), preset.config);
+      const result = await initStablecoin(coinName, coinSymbol, coinUri || "", Math.floor(Number(coinDecimals) || 0), preset.config);
       addToast("success", "Stablecoin Created", `${coinSymbol} mint: ${result.mint.toBase58().slice(0, 12)}...`, result.tx);
       setRegisterMintAddr(result.mint.toBase58());
       setCurrentStep(3);

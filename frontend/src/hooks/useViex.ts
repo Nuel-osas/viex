@@ -22,7 +22,9 @@ import {
   findBlacklistPDA,
   findRolePDA,
   findMinterInfoPDA,
+  findAllowlistPDA,
   findKycPDA,
+  findTravelRulePDA,
   findFxPairPDA,
   findOracleConfigPDA,
 } from "../utils/pda";
@@ -410,15 +412,10 @@ export function useViex() {
       const sourceAta = getAssociatedTokenAddressSync(
         mintPubkey,
         sourceOwner,
-        false,
+        true,
         TOKEN_2022_PROGRAM_ID
       );
-      const treasuryAta = getAssociatedTokenAddressSync(
-        mintPubkey,
-        treasuryOwner,
-        false,
-        TOKEN_2022_PROGRAM_ID
-      );
+      const treasuryAta = await ensureAta(mintPubkey, treasuryOwner);
       const [blacklistPda] = findBlacklistPDA(stablecoinPda, sourceOwner);
 
       const tx = await program.methods
@@ -832,7 +829,21 @@ export function useViex() {
       priceFeedPubkey: PublicKey
     ) => {
       if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
-      const [treasuryPda] = findTreasuryPDA(wallet.publicKey);
+
+      // Look up treasury authority from stablecoin data (converter may not be authority)
+      const [sourceStablecoinPda] = findStablecoinPDA(sourceMint);
+      let treasuryAuthority = wallet.publicKey;
+      const sourceData = stablecoins.get(sourceMint.toBase58());
+      if (sourceData?.authority) {
+        treasuryAuthority = sourceData.authority;
+      } else {
+        try {
+          const fetched = await program.account.stablecoin.fetch(sourceStablecoinPda);
+          treasuryAuthority = fetched.authority;
+        } catch { /* fallback to wallet */ }
+      }
+
+      const [treasuryPda] = findTreasuryPDA(treasuryAuthority);
       const [fxPairPda] = findFxPairPDA(treasuryPda, sourceMint, destMint);
 
       const converterSourceAta = getAssociatedTokenAddressSync(
@@ -841,14 +852,8 @@ export function useViex() {
         false,
         TOKEN_2022_PROGRAM_ID
       );
-      const converterDestAta = getAssociatedTokenAddressSync(
-        destMint,
-        wallet.publicKey,
-        false,
-        TOKEN_2022_PROGRAM_ID
-      );
+      const converterDestAta = await ensureAta(destMint, wallet.publicKey);
 
-      const [sourceStablecoinPda] = findStablecoinPDA(sourceMint);
       const [destStablecoinPda] = findStablecoinPDA(destMint);
 
       const tx = await program.methods
@@ -874,6 +879,120 @@ export function useViex() {
     [program, wallet.publicKey, refreshAll]
   );
 
+  // ── Missing functions added ──
+
+  const setSupplyCap = useCallback(
+    async (mintPubkey: PublicKey, cap: number) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const tx = await program.methods
+        .setSupplyCap(new BN(cap))
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda })
+        .rpc();
+      await refreshAll();
+      return tx;
+    },
+    [program, wallet.publicKey, refreshAll]
+  );
+
+  const updateMinterQuota = useCallback(
+    async (mintPubkey: PublicKey, minter: PublicKey, quota: number) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const [minterInfoPda] = findMinterInfoPDA(stablecoinPda, minter);
+      const tx = await program.methods
+        .updateMinterQuota(new BN(quota))
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda, minterInfo: minterInfoPda })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const updateMetadata = useCallback(
+    async (mintPubkey: PublicKey, uri: string) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const tx = await program.methods
+        .updateMetadata(uri)
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda, mint: mintPubkey, tokenProgram: TOKEN_2022_PROGRAM_ID })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const configureOracle = useCallback(
+    async (mintPubkey: PublicKey, priceFeed: PublicKey, maxDeviationBps: number, maxStalenessSecs: number, enabled: boolean) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const [oracleConfigPda] = findOracleConfigPDA(stablecoinPda);
+      const tx = await program.methods
+        .configureOracle(priceFeed, maxDeviationBps, new BN(maxStalenessSecs), enabled)
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda, oracleConfig: oracleConfigPda, systemProgram: SystemProgram.programId })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const addToAllowlist = useCallback(
+    async (mintPubkey: PublicKey, target: PublicKey) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const [allowlistPda] = findAllowlistPDA(stablecoinPda, target);
+      const tx = await program.methods
+        .addToAllowlist()
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda, target, allowlistEntry: allowlistPda, systemProgram: SystemProgram.programId })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const removeFromAllowlist = useCallback(
+    async (mintPubkey: PublicKey, target: PublicKey) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+      const [allowlistPda] = findAllowlistPDA(stablecoinPda, target);
+      const tx = await program.methods
+        .removeFromAllowlist()
+        .accounts({ authority: wallet.publicKey, stablecoin: stablecoinPda, allowlistEntry: allowlistPda })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const removeFxPair = useCallback(
+    async (sourceMint: PublicKey, destMint: PublicKey) => {
+      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      const [treasuryPda] = findTreasuryPDA(wallet.publicKey);
+      const [fxPairPda] = findFxPairPDA(treasuryPda, sourceMint, destMint);
+      const tx = await program.methods
+        .removeFxPair()
+        .accounts({ authority: wallet.publicKey, treasury: treasuryPda, fxPairConfig: fxPairPda })
+        .rpc();
+      return tx;
+    },
+    [program, wallet.publicKey]
+  );
+
+  const isBlacklisted = useCallback(
+    async (mintPubkey: PublicKey, target: PublicKey): Promise<boolean> => {
+      if (!program) return false;
+      try {
+        const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+        const [blacklistPda] = findBlacklistPDA(stablecoinPda, target);
+        const entry = await program.account.blacklistEntry.fetch(blacklistPda);
+        return entry.active;
+      } catch {
+        return false;
+      }
+    },
+    [program]
+  );
+
   return {
     program,
     provider,
@@ -893,6 +1012,7 @@ export function useViex() {
     removeFromBlacklist,
     closeBlacklistEntry,
     seize,
+    isBlacklisted,
     kycApprove,
     kycRevoke,
     kycClose,
@@ -910,5 +1030,12 @@ export function useViex() {
     unpause,
     configureFxPair,
     convert,
+    setSupplyCap,
+    updateMinterQuota,
+    updateMetadata,
+    configureOracle,
+    addToAllowlist,
+    removeFromAllowlist,
+    removeFxPair,
   };
 }

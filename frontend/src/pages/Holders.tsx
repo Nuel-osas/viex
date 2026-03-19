@@ -37,26 +37,36 @@ export default function Holders() {
     setLoading(true);
     try {
       const mintPk = new PublicKey(selectedMint);
+
+      // Token-2022 accounts have variable size due to extensions.
+      // Use memcmp on mint (first 32 bytes) without dataSize filter.
       const accounts = await connection.getParsedProgramAccounts(TOKEN_2022_PROGRAM_ID, {
         filters: [
-          { dataSize: 182 },
           { memcmp: { offset: 0, bytes: mintPk.toBase58() } },
         ],
       });
 
-      const parsed: TokenHolder[] = accounts.map((acc) => {
+      const parsed: TokenHolder[] = [];
+      for (const acc of accounts) {
         const data = (acc.account.data as any)?.parsed?.info;
-        const amt = data?.tokenAmount?.uiAmountString || data?.tokenAmount?.amount || "0";
-        return {
+        if (!data) continue;
+        // Skip mint accounts (we only want token accounts)
+        if (!data.owner) continue;
+        const uiAmt = data.tokenAmount?.uiAmountString || "0";
+        const rawAmt = parseFloat(data.tokenAmount?.amount || "0");
+        parsed.push({
           address: acc.pubkey.toBase58(),
-          owner: data?.owner || "Unknown",
-          amount: amt,
-          rawAmount: parseFloat(amt),
-          state: data?.state || "initialized",
-        };
-      });
+          owner: data.owner,
+          amount: uiAmt,
+          rawAmount: rawAmt,
+          state: data.state || "initialized",
+        });
+      }
 
       setHolders(parsed.sort((a, b) => b.rawAmount - a.rawAmount));
+      if (parsed.length === 0) {
+        addToast("info", "No Holders", "No token accounts found for this mint");
+      }
     } catch (err) {
       addToast("error", "Fetch Failed", parseError(err));
       setHolders([]);

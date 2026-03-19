@@ -5,10 +5,12 @@ import {
   PublicKey,
   Keypair,
   SystemProgram,
+  Transaction,
 } from "@solana/web3.js";
 import {
   TOKEN_2022_PROGRAM_ID,
   getAssociatedTokenAddressSync,
+  createAssociatedTokenAccountInstruction,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import idlJson from "../idl/viex_treasury.json";
@@ -233,21 +235,14 @@ export function useViex() {
     async (mintPubkey: PublicKey, amount: number, recipient: PublicKey) => {
       if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
       const [stablecoinPda] = findStablecoinPDA(mintPubkey);
-      const recipientAta = getAssociatedTokenAddressSync(
-        mintPubkey,
-        recipient,
-        false,
-        TOKEN_2022_PROGRAM_ID
-      );
+
+      // Auto-create recipient ATA if it doesn't exist
+      const recipientAta = await ensureAta(mintPubkey, recipient);
 
       // If caller is the authority, skip role/minterInfo (they don't need them)
-      const stablecoinData = stablecoins.get(mintPubkey.toBase58());
-      const isAuthority = stablecoinData?.authority?.toBase58() === wallet.publicKey.toBase58();
-
-      let roleAssignment: PublicKey | null = null;
+      const rolePda = await getRoleOrNull(mintPubkey, "minter");
       let minterInfo: PublicKey | null = null;
-      if (!isAuthority) {
-        [roleAssignment] = findRolePDA(stablecoinPda, "minter", wallet.publicKey);
+      if (rolePda) {
         [minterInfo] = findMinterInfoPDA(stablecoinPda, wallet.publicKey);
       }
 
@@ -257,7 +252,7 @@ export function useViex() {
           minter: wallet.publicKey,
           stablecoin: stablecoinPda,
           mint: mintPubkey,
-          roleAssignment,
+          roleAssignment: rolePda,
           minterInfo,
           recipientTokenAccount: recipientAta,
           oracleConfig: null,
@@ -282,13 +277,7 @@ export function useViex() {
         TOKEN_2022_PROGRAM_ID
       );
 
-      // If caller is the authority, skip role
-      const stablecoinData = stablecoins.get(mintPubkey.toBase58());
-      const isAuthority = stablecoinData?.authority?.toBase58() === wallet.publicKey.toBase58();
-      let roleAssignment: PublicKey | null = null;
-      if (!isAuthority) {
-        [roleAssignment] = findRolePDA(stablecoinPda, "burner", wallet.publicKey);
-      }
+      const rolePda = await getRoleOrNull(mintPubkey, "burner");
 
       const tx = await program.methods
         .burnTokens(new BN(amount))
@@ -296,7 +285,7 @@ export function useViex() {
           burner: wallet.publicKey,
           stablecoin: stablecoinPda,
           mint: mintPubkey,
-          roleAssignment,
+          roleAssignment: rolePda,
           burnerTokenAccount: burnerAta,
           oracleConfig: null,
           priceFeed: null,
@@ -309,12 +298,42 @@ export function useViex() {
     [program, wallet.publicKey, refreshAll]
   );
 
-  // Helper: returns role PDA or null if caller is the stablecoin authority
-  const getRoleOrNull = (mintPubkey: PublicKey, role: string): PublicKey | null => {
-    const stablecoinData = stablecoins.get(mintPubkey.toBase58());
-    if (stablecoinData?.authority?.toBase58() === wallet.publicKey?.toBase58()) return null;
+  // Helper: ensure ATA exists, create if needed
+  const ensureAta = async (mint: PublicKey, owner: PublicKey): Promise<PublicKey> => {
+    const ata = getAssociatedTokenAddressSync(mint, owner, true, TOKEN_2022_PROGRAM_ID);
+    const info = await connection.getAccountInfo(ata);
+    if (!info) {
+      const ix = createAssociatedTokenAccountInstruction(
+        wallet.publicKey!,
+        ata,
+        owner,
+        mint,
+        TOKEN_2022_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      const tx = new Transaction().add(ix);
+      await provider!.sendAndConfirm(tx);
+    }
+    return ata;
+  };
+
+  // Helper: returns role PDA or null if caller is the stablecoin authority.
+  // Checks local cache first, then fetches on-chain if needed.
+  const getRoleOrNull = async (mintPubkey: PublicKey, role: string): Promise<PublicKey | null> => {
+    if (!wallet.publicKey || !program) return null;
+    // Check local cache
+    let authority = stablecoins.get(mintPubkey.toBase58())?.authority;
+    // If not cached, fetch on-chain
+    if (!authority) {
+      try {
+        const [stablecoinPda] = findStablecoinPDA(mintPubkey);
+        const data = await program.account.stablecoin.fetch(stablecoinPda);
+        authority = data.authority;
+      } catch { /* ignore */ }
+    }
+    if (authority?.toBase58() === wallet.publicKey.toBase58()) return null;
     const [stablecoinPda] = findStablecoinPDA(mintPubkey);
-    const [rolePda] = findRolePDA(stablecoinPda, role, wallet.publicKey!);
+    const [rolePda] = findRolePDA(stablecoinPda, role, wallet.publicKey);
     return rolePda;
   };
 
@@ -331,7 +350,7 @@ export function useViex() {
           stablecoin: stablecoinPda,
           target,
           blacklistEntry: blacklistPda,
-          roleAssignment: getRoleOrNull(mintPubkey, "blacklister"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "blacklister"),
           systemProgram: SystemProgram.programId,
         })
         .rpc();
@@ -352,7 +371,7 @@ export function useViex() {
           authority: wallet.publicKey,
           stablecoin: stablecoinPda,
           blacklistEntry: blacklistPda,
-          roleAssignment: getRoleOrNull(mintPubkey, "blacklister"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "blacklister"),
         })
         .rpc();
       return tx;
@@ -372,7 +391,7 @@ export function useViex() {
           authority: wallet.publicKey,
           stablecoin: stablecoinPda,
           blacklistEntry: blacklistPda,
-          roleAssignment: getRoleOrNull(mintPubkey, "blacklister"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "blacklister"),
         })
         .rpc();
       return tx;
@@ -411,7 +430,7 @@ export function useViex() {
           sourceTokenAccount: sourceAta,
           treasuryTokenAccount: treasuryAta,
           blacklistEntry: blacklistPda,
-          roleAssignment: getRoleOrNull(mintPubkey, "seizer"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "seizer"),
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
         .rpc();
@@ -700,7 +719,7 @@ export function useViex() {
           stablecoin: stablecoinPda,
           mint: mintPubkey,
           tokenAccount,
-          roleAssignment: getRoleOrNull(mintPubkey, "pauser"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "pauser"),
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
         .rpc();
@@ -721,7 +740,7 @@ export function useViex() {
           stablecoin: stablecoinPda,
           mint: mintPubkey,
           tokenAccount,
-          roleAssignment: getRoleOrNull(mintPubkey, "pauser"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "pauser"),
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
         .rpc();
@@ -741,7 +760,7 @@ export function useViex() {
           authority: wallet.publicKey,
           stablecoin: stablecoinPda,
           mint: mintPubkey,
-          roleAssignment: getRoleOrNull(mintPubkey, "pauser"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "pauser"),
         })
         .rpc();
       await refreshAll();
@@ -761,7 +780,7 @@ export function useViex() {
           authority: wallet.publicKey,
           stablecoin: stablecoinPda,
           mint: mintPubkey,
-          roleAssignment: getRoleOrNull(mintPubkey, "pauser"),
+          roleAssignment: await getRoleOrNull(mintPubkey, "pauser"),
         })
         .rpc();
       await refreshAll();

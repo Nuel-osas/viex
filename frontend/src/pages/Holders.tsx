@@ -38,28 +38,37 @@ export default function Holders() {
     try {
       const mintPk = new PublicKey(selectedMint);
 
-      // Token-2022 accounts have variable size due to extensions.
-      // Use memcmp on mint (first 32 bytes) without dataSize filter.
-      const accounts = await connection.getParsedProgramAccounts(TOKEN_2022_PROGRAM_ID, {
-        filters: [
-          { memcmp: { offset: 0, bytes: mintPk.toBase58() } },
-        ],
-      });
+      // Use getTokenLargestAccounts for reliable Token-2022 support,
+      // then fetch each account's parsed data for owner + state info.
+      const largest = await connection.getTokenLargestAccounts(mintPk);
 
       const parsed: TokenHolder[] = [];
-      for (const acc of accounts) {
-        const data = (acc.account.data as any)?.parsed?.info;
-        if (!data) continue;
-        // Skip mint accounts (we only want token accounts)
-        if (!data.owner) continue;
-        const uiAmt = data.tokenAmount?.uiAmountString || "0";
-        const rawAmt = parseFloat(data.tokenAmount?.amount || "0");
+      // Fetch parsed info for each account
+      const accountInfos = await Promise.all(
+        largest.value.map((acc) =>
+          connection.getParsedAccountInfo(acc.address)
+        )
+      );
+
+      for (let i = 0; i < largest.value.length; i++) {
+        const entry = largest.value[i];
+        const info = accountInfos[i];
+        const data = (info.value?.data as any)?.parsed?.info;
+
+        const uiAmt = entry.uiAmountString || entry.amount || "0";
+        const rawAmt = parseFloat(entry.amount || "0");
+        const owner = data?.owner || "Unknown";
+        const state = data?.state || "initialized";
+
+        // Skip zero-balance accounts
+        if (rawAmt === 0) continue;
+
         parsed.push({
-          address: acc.pubkey.toBase58(),
-          owner: data.owner,
+          address: entry.address.toBase58(),
+          owner,
           amount: uiAmt,
           rawAmount: rawAmt,
-          state: data.state || "initialized",
+          state,
         });
       }
 

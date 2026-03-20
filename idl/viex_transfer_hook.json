@@ -11,7 +11,7 @@
       "name": "execute",
       "docs": [
         "Called by Token-2022 on every transfer.",
-        "Enforces blacklist and allowlist (KYC gate) checks."
+        "Enforces blacklist (AML) and KYC checks."
       ],
       "discriminator": [
         130,
@@ -48,11 +48,11 @@
           "optional": true
         },
         {
-          "name": "source_allowlist",
+          "name": "source_kyc",
           "optional": true
         },
         {
-          "name": "destination_allowlist",
+          "name": "dest_kyc",
           "optional": true
         }
       ],
@@ -66,7 +66,15 @@
     {
       "name": "initialize_extra_account_meta_list",
       "docs": [
-        "Initialize extra account metas for blacklist + allowlist PDA resolution"
+        "Initialize extra account metas for blacklist + KYC PDA resolution.",
+        "Layout:",
+        "0: source, 1: mint, 2: dest, 3: authority, 4: extraAccountMetaList",
+        "5: extra[0] = viex-treasury program ID",
+        "6: extra[1] = stablecoin PDA",
+        "7: extra[2] = source blacklist PDA",
+        "8: extra[3] = dest blacklist PDA",
+        "9: extra[4] = source KYC PDA (seeded by [kyc, treasury, source_owner])",
+        "10: extra[5] = dest KYC PDA (seeded by [kyc, treasury, dest_owner])"
       ],
       "discriminator": [
         92,
@@ -112,13 +120,13 @@
     },
     {
       "code": 6002,
-      "name": "SenderNotAllowlisted",
-      "msg": "Sender is not on the allowlist (KYC required)"
+      "name": "SenderKycNotApproved",
+      "msg": "Sender KYC not approved or expired"
     },
     {
       "code": 6003,
-      "name": "RecipientNotAllowlisted",
-      "msg": "Recipient is not on the allowlist (KYC required)"
+      "name": "RecipientKycNotApproved",
+      "msg": "Recipient KYC not approved or expired"
     }
   ]
 }

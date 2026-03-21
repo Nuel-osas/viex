@@ -5,8 +5,9 @@ import { parseError } from "../utils/errors";
 import { PublicKey } from "@solana/web3.js";
 
 export default function Transfer() {
-  const { treasury, stablecoins, transferTokens } = useViex();
+  const { treasury, stablecoins, transferTokens, initExtraAccountMetaList } = useViex();
   const { addToast } = useToast();
+  const [hookLoading, setHookLoading] = useState(false);
 
   const [selectedMint, setSelectedMint] = useState("");
   const [recipient, setRecipient] = useState("");
@@ -68,6 +69,35 @@ export default function Transfer() {
           <div className="text-sm text-emerald-300">
             <p className="font-medium">Compliance-Enforced Transfer</p>
             <p className="text-emerald-400/80 mt-1">This stablecoin has an active transfer hook. Blacklist and KYC checks will be enforced automatically on every transfer.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Init Hook (for existing mints that haven't had their ExtraAccountMetaList set up) */}
+      {hasHook && selectedMint && (
+        <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-300">Transfer Hook Setup</p>
+              <p className="text-xs text-gray-500 mt-0.5">If transfers fail with "account required", initialize the hook's account list for this mint.</p>
+            </div>
+            <button
+              onClick={async () => {
+                setHookLoading(true);
+                try {
+                  const tx = await initExtraAccountMetaList(new PublicKey(selectedMint));
+                  addToast("success", "Hook Initialized", "Extra account meta list created", tx);
+                } catch (err) {
+                  addToast("error", "Hook Init Failed", parseError(err));
+                } finally {
+                  setHookLoading(false);
+                }
+              }}
+              disabled={hookLoading}
+              className="bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-all disabled:opacity-40"
+            >
+              {hookLoading ? "Initializing..." : "Init Hook"}
+            </button>
           </div>
         </div>
       )}

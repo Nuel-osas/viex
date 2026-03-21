@@ -172,6 +172,34 @@ export function useViex() {
     [program, wallet.publicKey, refreshAll]
   );
 
+  // Initialize the ExtraAccountMetaList PDA for the transfer hook.
+  // Must be called once per mint that uses the hook.
+  const initExtraAccountMetaList = useCallback(
+    async (mintPubkey: PublicKey) => {
+      if (!wallet.publicKey || !provider) throw new Error("Wallet not connected");
+
+      const hookIdl = (await import("../idl/viex_transfer_hook.json")).default;
+      const hookProgram = new Program(hookIdl as any, provider);
+
+      const [extraMetaListPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("extra-account-metas"), mintPubkey.toBuffer()],
+        VIEX_TRANSFER_HOOK_PROGRAM_ID
+      );
+
+      const tx = await hookProgram.methods
+        .initializeExtraAccountMetaList()
+        .accounts({
+          payer: wallet.publicKey,
+          extraAccountMetaList: extraMetaListPda,
+          mint: mintPubkey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+      return tx;
+    },
+    [wallet.publicKey, provider]
+  );
+
   const initStablecoin = useCallback(
     async (
       name: string,
@@ -208,6 +236,12 @@ export function useViex() {
         .accounts(accounts)
         .signers([mintKeypair])
         .rpc();
+
+      // If transfer hook enabled, initialize the ExtraAccountMetaList for this mint
+      if (config.enableTransferHook) {
+        await initExtraAccountMetaList(mintKeypair.publicKey);
+      }
+
       await refreshAll();
       return { tx, mint: mintKeypair.publicKey };
     },
@@ -1071,5 +1105,6 @@ export function useViex() {
     removeFromAllowlist,
     removeFxPair,
     transferTokens,
+    initExtraAccountMetaList,
   };
 }

@@ -23,6 +23,11 @@ const icons = {
       <path d="M12 6v12M15 9.5c0-1.38-1.34-2.5-3-2.5s-3 1.12-3 2.5 1.34 2.5 3 2.5 3 1.12 3 2.5-1.34 2.5-3 2.5" />
     </svg>
   ),
+  transfer: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  ),
   convert: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
@@ -130,6 +135,7 @@ const sections: NavSection[] = [
     roleColor: "role-pill-emerald",
     items: [
       { path: "/mint-burn", label: "Mint & Burn", icon: "mint" },
+      { path: "/transfer", label: "Transfer", icon: "transfer" },
       { path: "/convert", label: "FX Convert", icon: "convert" },
       { path: "/holders", label: "Token Holders", icon: "holders" },
     ],

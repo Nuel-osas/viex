@@ -993,6 +993,39 @@ export function useViex() {
     [program]
   );
 
+  const transferTokens = useCallback(
+    async (mintPubkey: PublicKey, to: PublicKey, amount: number) => {
+      if (!program || !wallet.publicKey || !provider) throw new Error("Wallet not connected");
+      const { createTransferCheckedWithTransferHookInstruction } = await import("@solana/spl-token");
+
+      const senderAta = getAssociatedTokenAddressSync(mintPubkey, wallet.publicKey, false, TOKEN_2022_PROGRAM_ID);
+      const destAta = await ensureAta(mintPubkey, to);
+
+      const stablecoinData = stablecoins.get(mintPubkey.toBase58());
+      const decimals = stablecoinData?.decimals || 6;
+
+      // Build transfer instruction with hook account resolution
+      const ix = await createTransferCheckedWithTransferHookInstruction(
+        connection,
+        senderAta,
+        mintPubkey,
+        destAta,
+        wallet.publicKey,
+        BigInt(amount),
+        decimals,
+        [],
+        "confirmed",
+        TOKEN_2022_PROGRAM_ID,
+      );
+
+      const tx = new Transaction().add(ix);
+      const sig = await provider.sendAndConfirm(tx);
+      await refreshAll();
+      return sig;
+    },
+    [program, wallet.publicKey, provider, connection, stablecoins, refreshAll]
+  );
+
   return {
     program,
     provider,
@@ -1037,5 +1070,6 @@ export function useViex() {
     addToAllowlist,
     removeFromAllowlist,
     removeFxPair,
+    transferTokens,
   };
 }

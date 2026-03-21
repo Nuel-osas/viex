@@ -26,6 +26,7 @@ import Authority from "./pages/Authority";
 import Holders from "./pages/Holders";
 import FreezeThaw from "./pages/FreezeThaw";
 import Pause from "./pages/Pause";
+import Transfer from "./pages/Transfer";
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -59,6 +60,7 @@ export default function App() {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/initialize" element={<Initialize />} />
                         <Route path="/mint-burn" element={<MintBurn />} />
+                        <Route path="/transfer" element={<Transfer />} />
                         <Route path="/convert" element={<Convert />} />
                         <Route path="/compliance" element={<Compliance />} />
                         <Route path="/kyc" element={<Kyc />} />

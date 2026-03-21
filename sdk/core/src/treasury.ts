@@ -142,7 +142,7 @@ export class ViexTreasury {
     const program = ViexTreasury.getProgram(connection, authority, programId);
 
     // Verify the treasury account exists
-    await program.account.treasury.fetch(treasuryAddress);
+    await (program.account as any).treasury.fetch(treasuryAddress);
 
     return new ViexTreasury(program, connection, treasuryAddress, authority);
   }
@@ -165,7 +165,7 @@ export class ViexTreasury {
    * Fetch the on-chain Treasury account data.
    */
   async fetchTreasury(): Promise<TreasuryAccount> {
-    return (await this.program.account.treasury.fetch(
+    return (await (this.program.account as any).treasury.fetch(
       this.treasuryAddress
     )) as unknown as TreasuryAccount;
   }
@@ -175,7 +175,7 @@ export class ViexTreasury {
    */
   async fetchStablecoin(mint: PublicKey): Promise<StablecoinAccount> {
     const [stablecoin] = findStablecoinPDA(mint, this.program.programId);
-    return (await this.program.account.stablecoin.fetch(
+    return (await (this.program.account as any).stablecoin.fetch(
       stablecoin
     )) as unknown as StablecoinAccount;
   }
@@ -278,7 +278,7 @@ export class ViexTreasury {
     let oracleConfigAccount: PublicKey | null = null;
     let priceFeedAccount: PublicKey | null = null;
     try {
-      const oracleData = await this.program.account.oracleConfig.fetch(oracleConfig);
+      const oracleData = await (this.program.account as any).oracleConfig.fetch(oracleConfig);
       oracleConfigAccount = oracleConfig;
       priceFeedAccount = (oracleData as any).priceFeed;
     } catch {
@@ -330,7 +330,7 @@ export class ViexTreasury {
     let oracleConfigAccount: PublicKey | null = null;
     let priceFeedAccount: PublicKey | null = null;
     try {
-      const oracleData = await this.program.account.oracleConfig.fetch(oracleConfig);
+      const oracleData = await (this.program.account as any).oracleConfig.fetch(oracleConfig);
       oracleConfigAccount = oracleConfig;
       priceFeedAccount = (oracleData as any).priceFeed;
     } catch {
@@ -843,7 +843,7 @@ export class ViexTreasury {
     );
 
     // Fetch the FX pair to get the price feed
-    const fxPair = await this.program.account.fxPairConfig.fetch(fxPairConfig);
+    const fxPair = await (this.program.account as any).fxPairConfig.fetch(fxPairConfig);
     const priceFeed = (fxPair as any).priceFeed as PublicKey;
 
     const converterSourceAccount = getAssociatedTokenAddressSync(

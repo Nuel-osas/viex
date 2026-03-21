@@ -136,13 +136,10 @@ jobs:
         run: npm install
 
       - name: Install SDK dependencies
-        run: |
-          if [ -f sdk/core/package.json ]; then
-            cd sdk/core && npm install
-          fi
+        run: cd sdk/core && npm install
 
       - name: TypeScript compilation check
-        run: npx tsc --noEmit --project sdk/core/tsconfig.json 2>/dev/null || npx tsc --noEmit sdk/core/src/**/*.ts
+        run: cd sdk/core && npx tsc --noEmit --skipLibCheck
 
   backend-tests:
     name: Backend Tests

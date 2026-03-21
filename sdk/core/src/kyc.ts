@@ -107,7 +107,7 @@ export class KycModule {
       this.program.programId
     );
     try {
-      return (await this.program.account.kycEntry.fetch(
+      return (await (this.program.account as any).kycEntry.fetch(
         kycEntry
       )) as unknown as KycEntryAccount;
     } catch {

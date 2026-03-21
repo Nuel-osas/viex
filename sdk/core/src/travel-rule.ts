@@ -153,7 +153,7 @@ export class TravelRuleModule {
       this.program.programId
     );
     try {
-      return (await this.program.account.travelRuleMessage.fetch(
+      return (await (this.program.account as any).travelRuleMessage.fetch(
         travelRuleMessage
       )) as unknown as TravelRuleMessageAccount;
     } catch {

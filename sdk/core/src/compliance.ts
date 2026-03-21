@@ -126,7 +126,7 @@ export class ComplianceModule {
       this.program.programId
     );
     try {
-      const account = await this.program.account.blacklistEntry.fetch(
+      const account = await (this.program.account as any).blacklistEntry.fetch(
         blacklistEntry
       ) as unknown as BlacklistEntryAccount;
       return account.active;
@@ -266,7 +266,7 @@ export class ComplianceModule {
       this.program.programId
     );
     try {
-      await this.program.account.allowlistEntry.fetch(allowlistEntry);
+      await (this.program.account as any).allowlistEntry.fetch(allowlistEntry);
       return true;
     } catch {
       return false;

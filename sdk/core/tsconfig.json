@@ -12,6 +12,6 @@
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../target/types/**/*", "../../idl/**/*"],
   "exclude": ["node_modules", "dist"]
 }

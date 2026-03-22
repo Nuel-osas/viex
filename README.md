@@ -158,11 +158,40 @@ Treasury + Multi-Currency Tests (23):
   ✔ Per-minter quota enforcement
 ```
 
+## SDK
+
+```bash
+npm install viex-sdk
+```
+
+```typescript
+import { ViexTreasury, Presets, KycLevel } from "viex-sdk";
+
+// Create a treasury
+const treasury = await ViexTreasury.createTreasury(connection, authority, "Acme Treasury", "USD");
+
+// Create a compliant stablecoin
+const { mint } = await treasury.initStablecoin("Acme USD", "AUSD", uri, 6, Presets.compliance());
+
+// Mint tokens
+await treasury.mint(mint, recipient, 1_000_000);
+
+// KYC
+await treasury.kyc.approve(address, KycLevel.Enhanced, "USA", "Sumsub", 0);
+
+// Compliance
+await treasury.compliance.blacklistAdd(mint, badActor, "OFAC match");
+await treasury.compliance.seize(mint, sourceAta, treasuryAta);
+
+// Travel Rule
+await treasury.travelRule.attach(txSig, mint, amount, originator, beneficiary);
+```
+
 ## Quick Start
 
 ```bash
 # Clone and install
-git clone https://github.com/<repo>
+git clone https://github.com/Nuel-osas/viex.git
 cd viex
 npm install
 

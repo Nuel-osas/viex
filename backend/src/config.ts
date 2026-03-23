@@ -88,85 +88,31 @@ export const idl = loadIdl();
 export const program = new Program(idl, provider);
 
 // ---------------------------------------------------------------------------
-// PDA helpers
+// PDA helpers — re-exported from viex-sdk (see import at top)
+// Legacy aliases for backward compatibility with services
 // ---------------------------------------------------------------------------
 
-export function findTreasuryPda(authority: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("treasury"), authority.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
+// Legacy aliases mapping old names to viex-sdk exports
+import {
+  findTreasuryPDA,
+  findStablecoinPDA,
+  findBlacklistPDA,
+  findAllowlistPDA,
+  findRolePDA,
+  findMinterInfoPDA,
+  findKycPDA,
+  findTravelRulePDA,
+  findFxPairPDA,
+  findOracleConfigPDA,
+} from "viex-sdk";
 
-export function findStablecoinPda(mint: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("stablecoin"), mint.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findBlacklistEntryPda(
-  stablecoin: PublicKey,
-  target: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("blacklist"), stablecoin.toBuffer(), target.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findAllowlistEntryPda(
-  stablecoin: PublicKey,
-  target: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("allowlist"), stablecoin.toBuffer(), target.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findRoleAssignmentPda(
-  stablecoin: PublicKey,
-  role: string,
-  assignee: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("role"),
-      stablecoin.toBuffer(),
-      Buffer.from(role),
-      assignee.toBuffer(),
-    ],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findMinterInfoPda(
-  stablecoin: PublicKey,
-  minter: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("minter_info"), stablecoin.toBuffer(), minter.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findKycEntryPda(
-  treasury: PublicKey,
-  target: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("kyc"), treasury.toBuffer(), target.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findTravelRuleMessagePda(
-  treasury: PublicKey,
-  sigHash: Buffer
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from("travel_rule"), treasury.toBuffer(), sigHash],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
+export const findTreasuryPda = findTreasuryPDA;
+export const findStablecoinPda = findStablecoinPDA;
+export const findBlacklistEntryPda = findBlacklistPDA;
+export const findAllowlistEntryPda = findAllowlistPDA;
+export const findRoleAssignmentPda = findRolePDA;
+export const findMinterInfoPda = findMinterInfoPDA;
+export const findKycEntryPda = findKycPDA;
+export const findTravelRuleMessagePda = findTravelRulePDA;
+export const findFxPairConfigPda = findFxPairPDA;
+export const findOracleConfigPda = findOracleConfigPDA;

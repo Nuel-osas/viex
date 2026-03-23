@@ -27,7 +27,7 @@ import {
   findTravelRulePDA,
   findFxPairPDA,
   findOracleConfigPDA,
-} from "../utils/pda";
+} from "viex-sdk";
 
 export interface TreasuryState {
   authority: PublicKey;

@@ -33,75 +33,20 @@ export const SYSTEM_PROGRAM_ID = new PublicKey(
   "11111111111111111111111111111111"
 );
 
-// ── Seed constants ──────────────────────────────────────────────────────────
+// ── PDA derivation — re-exported from viex-sdk ─────────────────────────────
 
-const TREASURY_SEED = Buffer.from("treasury");
-const STABLECOIN_SEED = Buffer.from("stablecoin");
-const ROLE_SEED = Buffer.from("role");
-const MINTER_INFO_SEED = Buffer.from("minter_info");
-const BLACKLIST_SEED = Buffer.from("blacklist");
-const ALLOWLIST_SEED = Buffer.from("allowlist");
-const KYC_SEED = Buffer.from("kyc");
-const TRAVEL_RULE_SEED = Buffer.from("travel_rule");
-const FX_PAIR_SEED = Buffer.from("fx_pair");
-const ORACLE_CONFIG_SEED = Buffer.from("oracle_config");
-
-// ── PDA derivation ──────────────────────────────────────────────────────────
-
-export function findTreasuryPDA(authority: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [TREASURY_SEED, authority.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findStablecoinPDA(mint: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [STABLECOIN_SEED, mint.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findRolePDA(
-  stablecoin: PublicKey,
-  role: string,
-  assignee: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [ROLE_SEED, stablecoin.toBuffer(), Buffer.from(role), assignee.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findMinterInfoPDA(
-  stablecoin: PublicKey,
-  minter: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [MINTER_INFO_SEED, stablecoin.toBuffer(), minter.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findBlacklistPDA(
-  stablecoin: PublicKey,
-  address: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [BLACKLIST_SEED, stablecoin.toBuffer(), address.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
-
-export function findAllowlistPDA(
-  stablecoin: PublicKey,
-  address: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [ALLOWLIST_SEED, stablecoin.toBuffer(), address.toBuffer()],
-    VIEX_TREASURY_PROGRAM_ID
-  );
-}
+export {
+  findTreasuryPDA,
+  findStablecoinPDA,
+  findRolePDA,
+  findMinterInfoPDA,
+  findBlacklistPDA,
+  findAllowlistPDA,
+  findKycPDA,
+  findTravelRulePDA,
+  findFxPairPDA,
+  findOracleConfigPDA,
+} from "viex-sdk";
 
 export function findKycPDA(
   treasury: PublicKey,

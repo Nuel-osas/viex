@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  SOLANA_VERSION: "2.2.14"
+  SOLANA_VERSION: "2.1.21"
   ANCHOR_VERSION: "0.31.1"
   NODE_VERSION: "20"
 
@@ -21,36 +21,36 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
+      - name: Cache cargo
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install Solana ${{ env.SOLANA_VERSION }}
+      - name: Install Solana
         run: |
           sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
-      - name: Install Anchor ${{ env.ANCHOR_VERSION }}
+      - name: Install Anchor CLI
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
+          npm i -g @coral-xyz/anchor-cli@${{ env.ANCHOR_VERSION }}
 
       - name: Build programs
         run: anchor build
 
-      - name: Upload .so artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: program-so
-          path: target/deploy/*.so
+          path: |
+            target/deploy/*.so
+            target/idl/*.json
+            target/types/*.ts
           retention-days: 7
 
   anchor-tests:
@@ -62,83 +62,56 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
+      - name: Cache cargo
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-test-
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Cache .anchor
-        uses: actions/cache@v4
-        with:
-          path: .anchor
-          key: ${{ runner.os }}-anchor-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-anchor-
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-root-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-root-
 
       - name: Install Node dependencies
         run: npm install
 
-      - name: Install Solana ${{ env.SOLANA_VERSION }}
+      - name: Install Solana
         run: |
           sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
-      - name: Install Anchor ${{ env.ANCHOR_VERSION }}
-        run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
+      - name: Install Anchor CLI
+        run: npm i -g @coral-xyz/anchor-cli@${{ env.ANCHOR_VERSION }}
+
+      - name: Setup Solana keypair
+        run: solana-keygen new --no-bip39-passphrase -s -o ~/.config/solana/id.json
 
       - name: Run anchor tests
         run: anchor test
 
-  sdk-tests:
-    name: SDK Tests
+  sdk-check:
+    name: SDK Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            sdk/core/node_modules
-          key: ${{ runner.os }}-node-sdk-${{ hashFiles('package-lock.json', 'sdk/core/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-sdk-
-
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm install
 
       - name: Install SDK dependencies
         run: cd sdk/core && npm install
 
-      - name: TypeScript compilation check
+      - name: TypeScript check
         run: cd sdk/core && npx tsc --noEmit --skipLibCheck
 
   backend-tests:
@@ -147,18 +120,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: backend/node_modules
-          key: ${{ runner.os }}-node-backend-${{ hashFiles('backend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-backend-
 
       - name: Install dependencies
         run: cd backend && npm install
@@ -172,18 +137,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-node-frontend-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-frontend-
 
       - name: Install dependencies
         run: cd frontend && npm install

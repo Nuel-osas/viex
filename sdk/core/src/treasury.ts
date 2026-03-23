@@ -49,7 +49,7 @@ import { KycModule } from "./kyc";
 import { TravelRuleModule } from "./travel-rule";
 
 // Re-export the IDL type for consumers who load their own IDL
-import type { ViexTreasury as ViexTreasuryIDL } from "../../../target/types/viex_treasury";
+import type { ViexTreasury as ViexTreasuryIDL } from "../../../idl/viex_treasury";
 
 /**
  * ViexTreasury — Main SDK class for interacting with the VIEX Treasury program.
@@ -906,11 +906,15 @@ export class ViexTreasury {
     // We use require to avoid async top-level import issues.
     let idl: any;
     try {
-      idl = require("../../../target/idl/viex_treasury.json");
+      idl = require("../../../idl/viex_treasury.json");
     } catch {
-      throw new Error(
-        "Could not load IDL. Ensure target/idl/viex_treasury.json exists or provide IDL manually."
-      );
+      try {
+        idl = require("../../../target/idl/viex_treasury.json");
+      } catch {
+        throw new Error(
+          "Could not load IDL. Ensure idl/viex_treasury.json exists or provide IDL manually."
+        );
+      }
     }
 
     return new Program(idl, provider);

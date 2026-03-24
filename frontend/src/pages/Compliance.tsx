@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useViex } from "../hooks/useViex";
 import { useToast } from "../components/Toast";
 import { parseError } from "../utils/errors";
 import { PublicKey } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 type Tab = "blacklist" | "seize";
 
 export default function Compliance() {
-  const { treasury, stablecoins, addToBlacklist, removeFromBlacklist, closeBlacklistEntry, seize, isBlacklisted } = useViex();
+  const { treasury, stablecoins, addToBlacklist, removeFromBlacklist, closeBlacklistEntry, seize, isBlacklisted, program } = useViex();
   const { addToast } = useToast();
+  const wallet = useWallet();
 
   const [activeTab, setActiveTab] = useState<Tab>("blacklist");
 
@@ -37,8 +39,41 @@ export default function Compliance() {
   // Seize
   const [seizeMint, setSeizeMint] = useState("");
   const [seizeFrom, setSeizeFrom] = useState("");
-  const [seizeTo, setSeizeTo] = useState("");
+  const [seizeTo, setSeizeTo] = useState(wallet.publicKey?.toBase58() || "");
   const [seizeLoading, setSeizeLoading] = useState(false);
+  const [blacklistedAddresses, setBlacklistedAddresses] = useState<string[]>([]);
+  const [fetchingBlacklist, setFetchingBlacklist] = useState(false);
+
+  // Auto-fill destination with connected wallet
+  useEffect(() => {
+    if (wallet.publicKey && !seizeTo) {
+      setSeizeTo(wallet.publicKey.toBase58());
+    }
+  }, [wallet.publicKey]);
+
+  // Fetch blacklisted addresses when mint changes
+  useEffect(() => {
+    if (!seizeMint || !program) return;
+    const fetchBlacklisted = async () => {
+      setFetchingBlacklist(true);
+      try {
+        const accounts = await program.account.blacklistEntry.all();
+        const stablecoinPda = PublicKey.findProgramAddressSync(
+          [Buffer.from("stablecoin"), new PublicKey(seizeMint).toBuffer()],
+          program.programId
+        )[0];
+        const active = accounts
+          .filter((a: any) => a.account.active && a.account.stablecoin.toBase58() === stablecoinPda.toBase58())
+          .map((a: any) => a.account.address.toBase58());
+        setBlacklistedAddresses(active);
+      } catch {
+        setBlacklistedAddresses([]);
+      } finally {
+        setFetchingBlacklist(false);
+      }
+    };
+    fetchBlacklisted();
+  }, [seizeMint, program]);
 
   const mintList = treasury?.mints || [];
   const getSymbol = (mint: string) => {
@@ -374,11 +409,33 @@ export default function Compliance() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Source Account (blacklisted owner)</label>
-                <input type="text" value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} placeholder="Source wallet" className={`${inputClass} font-mono text-sm`} />
+                {blacklistedAddresses.length > 0 ? (
+                  <select value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} className={selectClass}>
+                    <option value="">Select blacklisted address...</option>
+                    {blacklistedAddresses.map((addr) => (
+                      <option key={addr} value={addr}>{addr.slice(0, 8)}...{addr.slice(-6)}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input type="text" value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} placeholder={fetchingBlacklist ? "Loading blacklisted addresses..." : "No blacklisted addresses found — enter manually"} className={`${inputClass} font-mono text-sm`} />
+                )}
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Treasury Account (destination owner)</label>
-                <input type="text" value={seizeTo} onChange={(e) => setSeizeTo(e.target.value)} placeholder="Destination wallet" className={`${inputClass} font-mono text-sm`} />
+                <div className="flex gap-2">
+                  <input type="text" value={seizeTo} onChange={(e) => setSeizeTo(e.target.value)} placeholder="Destination wallet" className={`${inputClass} font-mono text-sm flex-1`} />
+                  {wallet.publicKey && seizeTo !== wallet.publicKey.toBase58() && (
+                    <button
+                      onClick={() => setSeizeTo(wallet.publicKey!.toBase58())}
+                      className="px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-all whitespace-nowrap"
+                    >
+                      Use My Wallet
+                    </button>
+                  )}
+                </div>
+                {wallet.publicKey && seizeTo === wallet.publicKey.toBase58() && (
+                  <p className="text-xs text-emerald-400 mt-1">Using your connected wallet</p>
+                )}
               </div>
             </div>
           </div>

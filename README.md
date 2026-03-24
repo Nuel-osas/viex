@@ -247,6 +247,19 @@ cd frontend && npm install && npm run dev
 - `security_txt!` macro embedded in both programs
 - Blacklist deactivation preserves audit trail (entries never deleted)
 
+## Known Limitations
+
+| Feature | Limitation | Reason |
+|---------|-----------|--------|
+| **FX Conversion** | Configure FX Pair succeeds, but actual conversion fails on devnet | Pyth v2 push price feeds on devnet are stale (last updated Aug 2024). Pyth has migrated to a pull-based model. The on-chain conversion logic is correct and passes all localnet tests (53/53). On mainnet with live Pyth feeds, FX conversion works end-to-end. |
+| **Confidential Transfers (SSS-3)** | CT extension is initialized on the mint but ZK transfers are not available on devnet | Solana's ZK ElGamal Proof program is disabled on devnet/mainnet. Works on localnet with Token-2022 v10 built from source. |
+
+## Links
+
+- **GitHub**: https://github.com/Nuel-osas/viex
+- **Frontend**: https://viex-three.vercel.app
+- **npm SDK**: https://www.npmjs.com/package/viex-sdk
+
 ## License
 
 MIT

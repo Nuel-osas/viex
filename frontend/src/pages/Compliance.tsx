@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useViex } from "../hooks/useViex";
 import { useToast } from "../components/Toast";
 import { parseError } from "../utils/errors";
@@ -6,6 +6,12 @@ import { PublicKey } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 type Tab = "blacklist" | "seize";
+
+interface BlacklistInfo {
+  address: string;
+  active: boolean;
+  reason: string;
+}
 
 export default function Compliance() {
   const { treasury, stablecoins, addToBlacklist, removeFromBlacklist, closeBlacklistEntry, seize, isBlacklisted, program } = useViex();
@@ -41,7 +47,9 @@ export default function Compliance() {
   const [seizeFrom, setSeizeFrom] = useState("");
   const [seizeTo, setSeizeTo] = useState(wallet.publicKey?.toBase58() || "");
   const [seizeLoading, setSeizeLoading] = useState(false);
-  const [blacklistedAddresses, setBlacklistedAddresses] = useState<string[]>([]);
+
+  // Shared blacklist data per mint
+  const [blacklistData, setBlacklistData] = useState<Map<string, BlacklistInfo[]>>(new Map());
   const [fetchingBlacklist, setFetchingBlacklist] = useState(false);
 
   // Auto-fill destination with connected wallet
@@ -51,29 +59,45 @@ export default function Compliance() {
     }
   }, [wallet.publicKey]);
 
-  // Fetch blacklisted addresses when mint changes
-  useEffect(() => {
-    if (!seizeMint || !program) return;
-    const fetchBlacklisted = async () => {
-      setFetchingBlacklist(true);
-      try {
-        const accounts = await program.account.blacklistEntry.all();
-        const stablecoinPda = PublicKey.findProgramAddressSync(
-          [Buffer.from("stablecoin"), new PublicKey(seizeMint).toBuffer()],
-          program.programId
-        )[0];
-        const active = accounts
-          .filter((a: any) => a.account.active && a.account.stablecoin.toBase58() === stablecoinPda.toBase58())
-          .map((a: any) => a.account.address.toBase58());
-        setBlacklistedAddresses(active);
-      } catch {
-        setBlacklistedAddresses([]);
-      } finally {
-        setFetchingBlacklist(false);
-      }
-    };
-    fetchBlacklisted();
-  }, [seizeMint, program]);
+  // Fetch all blacklisted addresses for a given mint
+  const fetchBlacklistForMint = useCallback(async (mint: string) => {
+    if (!mint || !program) return;
+    if (blacklistData.has(mint)) return; // already fetched
+    setFetchingBlacklist(true);
+    try {
+      const accounts = await (program.account as any).blacklistEntry.all();
+      const stablecoinPda = PublicKey.findProgramAddressSync(
+        [Buffer.from("stablecoin"), new PublicKey(mint).toBuffer()],
+        program.programId
+      )[0];
+      const entries: BlacklistInfo[] = accounts
+        .filter((a: any) => a.account.stablecoin.toBase58() === stablecoinPda.toBase58())
+        .map((a: any) => ({
+          address: a.account.address.toBase58(),
+          active: a.account.active,
+          reason: a.account.reason || "",
+        }));
+      setBlacklistData((prev) => new Map(prev).set(mint, entries));
+    } catch {
+      // ignore
+    } finally {
+      setFetchingBlacklist(false);
+    }
+  }, [program]);
+
+  // Refresh blacklist data (force re-fetch)
+  const refreshBlacklist = useCallback((mint: string) => {
+    setBlacklistData((prev) => { const m = new Map(prev); m.delete(mint); return m; });
+    fetchBlacklistForMint(mint);
+  }, [fetchBlacklistForMint]);
+
+  // Fetch when any mint selector changes
+  useEffect(() => { fetchBlacklistForMint(removeMint); }, [removeMint]);
+  useEffect(() => { fetchBlacklistForMint(closeMint); }, [closeMint]);
+  useEffect(() => { fetchBlacklistForMint(seizeMint); }, [seizeMint]);
+
+  const getActiveBlacklisted = (mint: string) => (blacklistData.get(mint) || []).filter((e) => e.active);
+  const getInactiveBlacklisted = (mint: string) => (blacklistData.get(mint) || []).filter((e) => !e.active);
 
   const mintList = treasury?.mints || [];
   const getSymbol = (mint: string) => {
@@ -250,7 +274,7 @@ export default function Compliance() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Stablecoin</label>
-                <select value={removeMint} onChange={(e) => setRemoveMint(e.target.value)} className={selectClass}>
+                <select value={removeMint} onChange={(e) => { setRemoveMint(e.target.value); setRemoveTarget(""); }} className={selectClass}>
                   <option value="">Select...</option>
                   {mintList.map((m) => (
                     <option key={m.toBase58()} value={m.toBase58()}>{getSymbol(m.toBase58())}</option>
@@ -258,12 +282,21 @@ export default function Compliance() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1.5">Target Address</label>
-                <input type="text" value={removeTarget} onChange={(e) => setRemoveTarget(e.target.value)} placeholder="Address to unblacklist" className={`${inputClass} font-mono text-sm`} />
+                <label className="block text-sm text-gray-400 mb-1.5">Blacklisted Address</label>
+                {getActiveBlacklisted(removeMint).length > 0 ? (
+                  <select value={removeTarget} onChange={(e) => setRemoveTarget(e.target.value)} className={selectClass}>
+                    <option value="">Select blacklisted address...</option>
+                    {getActiveBlacklisted(removeMint).map((e) => (
+                      <option key={e.address} value={e.address}>{e.address.slice(0, 8)}...{e.address.slice(-6)} — {e.reason || "No reason"}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input type="text" value={removeTarget} onChange={(e) => setRemoveTarget(e.target.value)} placeholder={removeMint ? (fetchingBlacklist ? "Loading..." : "No active blacklist entries") : "Select a mint first"} className={`${inputClass} font-mono text-sm`} />
+                )}
               </div>
             </div>
             <button
-              onClick={handleRemove}
+              onClick={async () => { await handleRemove(); refreshBlacklist(removeMint); }}
               disabled={!removeMint || !removeTarget || removeLoading}
               className="mt-6 bg-amber-600 hover:bg-amber-500 text-white font-medium px-6 py-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -298,7 +331,7 @@ export default function Compliance() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Stablecoin</label>
-                <select value={closeMint} onChange={(e) => setCloseMint(e.target.value)} className={selectClass}>
+                <select value={closeMint} onChange={(e) => { setCloseMint(e.target.value); setCloseTarget(""); }} className={selectClass}>
                   <option value="">Select...</option>
                   {mintList.map((m) => (
                     <option key={m.toBase58()} value={m.toBase58()}>{getSymbol(m.toBase58())}</option>
@@ -306,12 +339,21 @@ export default function Compliance() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1.5">Target Address</label>
-                <input type="text" value={closeTarget} onChange={(e) => setCloseTarget(e.target.value)} placeholder="Blacklisted address" className={`${inputClass} font-mono text-sm`} />
+                <label className="block text-sm text-gray-400 mb-1.5">Deactivated Entry</label>
+                {getInactiveBlacklisted(closeMint).length > 0 ? (
+                  <select value={closeTarget} onChange={(e) => setCloseTarget(e.target.value)} className={selectClass}>
+                    <option value="">Select deactivated entry...</option>
+                    {getInactiveBlacklisted(closeMint).map((e) => (
+                      <option key={e.address} value={e.address}>{e.address.slice(0, 8)}...{e.address.slice(-6)} — {e.reason || "No reason"}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input type="text" value={closeTarget} onChange={(e) => setCloseTarget(e.target.value)} placeholder={closeMint ? (fetchingBlacklist ? "Loading..." : "No deactivated entries to close") : "Select a mint first"} className={`${inputClass} font-mono text-sm`} />
+                )}
               </div>
             </div>
             <button
-              onClick={handleClose}
+              onClick={async () => { await handleClose(); refreshBlacklist(closeMint); }}
               disabled={!closeMint || !closeTarget || closeLoading}
               className="mt-6 bg-gray-700 hover:bg-gray-600 text-white font-medium px-6 py-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -409,15 +451,15 @@ export default function Compliance() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1.5">Source Account (blacklisted owner)</label>
-                {blacklistedAddresses.length > 0 ? (
+                {getActiveBlacklisted(seizeMint).length > 0 ? (
                   <select value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} className={selectClass}>
                     <option value="">Select blacklisted address...</option>
-                    {blacklistedAddresses.map((addr) => (
-                      <option key={addr} value={addr}>{addr.slice(0, 8)}...{addr.slice(-6)}</option>
+                    {getActiveBlacklisted(seizeMint).map((e) => (
+                      <option key={e.address} value={e.address}>{e.address.slice(0, 8)}...{e.address.slice(-6)} — {e.reason || "No reason"}</option>
                     ))}
                   </select>
                 ) : (
-                  <input type="text" value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} placeholder={fetchingBlacklist ? "Loading blacklisted addresses..." : "No blacklisted addresses found — enter manually"} className={`${inputClass} font-mono text-sm`} />
+                  <input type="text" value={seizeFrom} onChange={(e) => setSeizeFrom(e.target.value)} placeholder={fetchingBlacklist ? "Loading..." : "No blacklisted addresses found — enter manually"} className={`${inputClass} font-mono text-sm`} />
                 )}
               </div>
               <div>

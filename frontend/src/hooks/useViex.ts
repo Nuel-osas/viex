@@ -458,40 +458,45 @@ export function useViex() {
       const treasuryAta = await ensureAta(mintPubkey, treasuryOwner);
       const [blacklistPda] = findBlacklistPDA(stablecoinPda, sourceOwner);
 
-      // Resolve transfer hook extra accounts for the seize (TransferChecked via permanent delegate)
-      let remainingAccounts: any[] = [];
+      // Build transfer hook extra accounts manually for the seize.
+      // The hook needs: extraAccountMetaList, hookProgram, stablecoin,
+      // sourceBlacklist, destBlacklist, sourceKyc, destKyc
+      const [extraMetaListPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("extra-account-metas"), mintPubkey.toBuffer()],
+        VIEX_TRANSFER_HOOK_PROGRAM_ID
+      );
+      const [sourceBlacklistPda] = findBlacklistPDA(stablecoinPda, sourceOwner);
+      const [destBlacklistPda] = findBlacklistPDA(stablecoinPda, treasuryOwner);
+
+      // Get treasury key from stablecoin for KYC PDAs
+      let treasuryKey = wallet.publicKey;
       try {
-        const { getExtraAccountMetaAddress, resolveExtraAccountMetas } = await import("@solana/spl-token");
-        const extraMetaListPda = getExtraAccountMetaAddress(mintPubkey, VIEX_TRANSFER_HOOK_PROGRAM_ID);
-        const extraMetaListInfo = await connection.getAccountInfo(extraMetaListPda);
-        if (extraMetaListInfo) {
-          const transferIx = {
-            keys: [
-              { pubkey: sourceAta, isSigner: false, isWritable: true },
-              { pubkey: mintPubkey, isSigner: false, isWritable: false },
-              { pubkey: treasuryAta, isSigner: false, isWritable: true },
-              { pubkey: stablecoinPda, isSigner: false, isWritable: false },
-            ],
-            programId: TOKEN_2022_PROGRAM_ID,
-            data: Buffer.alloc(0),
-          };
-          await resolveExtraAccountMetas(
-            connection,
-            transferIx,
-            extraMetaListPda,
-            extraMetaListInfo,
-            VIEX_TRANSFER_HOOK_PROGRAM_ID,
-          );
-          // Extra accounts start at index 4 (after source, mint, dest, authority)
-          remainingAccounts = transferIx.keys.slice(4).map((k: any) => ({
-            pubkey: k.pubkey,
-            isSigner: k.isSigner,
-            isWritable: k.isWritable,
-          }));
-        }
-      } catch (err) {
-        console.warn("Could not resolve transfer hook accounts for seize:", err);
-      }
+        const scData = await (program.account as any).stablecoin.fetch(stablecoinPda);
+        treasuryKey = scData.treasury || wallet.publicKey;
+      } catch {}
+      const [treasuryPda] = findTreasuryPDA(treasuryKey);
+
+      // KYC PDAs use treasury PDA as seed, but we need the actual treasury account key
+      // The treasury field in stablecoin IS the treasury PDA
+      const sourceKycPda = PublicKey.findProgramAddressSync(
+        [Buffer.from("kyc"), treasuryPda.toBuffer(), sourceOwner.toBuffer()],
+        program.programId
+      )[0];
+      const destKycPda = PublicKey.findProgramAddressSync(
+        [Buffer.from("kyc"), treasuryPda.toBuffer(), treasuryOwner.toBuffer()],
+        program.programId
+      )[0];
+
+      const remainingAccounts = [
+        { pubkey: extraMetaListPda, isSigner: false, isWritable: false },
+        { pubkey: VIEX_TRANSFER_HOOK_PROGRAM_ID, isSigner: false, isWritable: false },
+        { pubkey: program.programId, isSigner: false, isWritable: false },
+        { pubkey: stablecoinPda, isSigner: false, isWritable: false },
+        { pubkey: sourceBlacklistPda, isSigner: false, isWritable: false },
+        { pubkey: destBlacklistPda, isSigner: false, isWritable: false },
+        { pubkey: sourceKycPda, isSigner: false, isWritable: false },
+        { pubkey: destKycPda, isSigner: false, isWritable: false },
+      ];
 
       const tx = await program.methods
         .seize()

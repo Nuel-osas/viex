@@ -447,7 +447,7 @@ export function useViex() {
       sourceOwner: PublicKey,
       treasuryOwner: PublicKey
     ) => {
-      if (!program || !wallet.publicKey) throw new Error("Wallet not connected");
+      if (!program || !wallet.publicKey || !provider) throw new Error("Wallet not connected");
       const [stablecoinPda] = findStablecoinPDA(mintPubkey);
       const sourceAta = getAssociatedTokenAddressSync(
         mintPubkey,
@@ -457,6 +457,41 @@ export function useViex() {
       );
       const treasuryAta = await ensureAta(mintPubkey, treasuryOwner);
       const [blacklistPda] = findBlacklistPDA(stablecoinPda, sourceOwner);
+
+      // Resolve transfer hook extra accounts for the seize (TransferChecked via permanent delegate)
+      let remainingAccounts: any[] = [];
+      try {
+        const { getExtraAccountMetaAddress, resolveExtraAccountMetas } = await import("@solana/spl-token");
+        const extraMetaListPda = getExtraAccountMetaAddress(mintPubkey, VIEX_TRANSFER_HOOK_PROGRAM_ID);
+        const extraMetaListInfo = await connection.getAccountInfo(extraMetaListPda);
+        if (extraMetaListInfo) {
+          const transferIx = {
+            keys: [
+              { pubkey: sourceAta, isSigner: false, isWritable: true },
+              { pubkey: mintPubkey, isSigner: false, isWritable: false },
+              { pubkey: treasuryAta, isSigner: false, isWritable: true },
+              { pubkey: stablecoinPda, isSigner: false, isWritable: false },
+            ],
+            programId: TOKEN_2022_PROGRAM_ID,
+            data: Buffer.alloc(0),
+          };
+          await resolveExtraAccountMetas(
+            connection,
+            transferIx,
+            extraMetaListPda,
+            extraMetaListInfo,
+            VIEX_TRANSFER_HOOK_PROGRAM_ID,
+          );
+          // Extra accounts start at index 4 (after source, mint, dest, authority)
+          remainingAccounts = transferIx.keys.slice(4).map((k: any) => ({
+            pubkey: k.pubkey,
+            isSigner: k.isSigner,
+            isWritable: k.isWritable,
+          }));
+        }
+      } catch (err) {
+        console.warn("Could not resolve transfer hook accounts for seize:", err);
+      }
 
       const tx = await program.methods
         .seize()
@@ -470,6 +505,7 @@ export function useViex() {
           roleAssignment: await getRoleOrNull(mintPubkey, "seizer"),
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
+        .remainingAccounts(remainingAccounts)
         .rpc();
       return tx;
     },

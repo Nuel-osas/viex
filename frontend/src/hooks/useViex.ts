@@ -14,6 +14,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import idlJson from "../idl/viex_treasury.json";
+import hookIdlJson from "../idl/viex_transfer_hook.json";
 import {
   VIEX_TREASURY_PROGRAM_ID,
   VIEX_TRANSFER_HOOK_PROGRAM_ID,
@@ -178,8 +179,7 @@ export function useViex() {
     async (mintPubkey: PublicKey) => {
       if (!wallet.publicKey || !provider) throw new Error("Wallet not connected");
 
-      const hookIdl = (await import("../idl/viex_transfer_hook.json")).default;
-      const hookProgram = new Program(hookIdl as any, provider);
+      const hookProgram = new Program(hookIdlJson as any, provider);
 
       const [extraMetaListPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("extra-account-metas"), mintPubkey.toBuffer()],
@@ -239,13 +239,19 @@ export function useViex() {
 
       // If transfer hook enabled, initialize the ExtraAccountMetaList for this mint
       if (config.enableTransferHook) {
-        await initExtraAccountMetaList(mintKeypair.publicKey);
+        try {
+          console.log("Initializing transfer hook ExtraAccountMetaList...");
+          await initExtraAccountMetaList(mintKeypair.publicKey);
+          console.log("Transfer hook initialized successfully");
+        } catch (hookErr) {
+          console.error("Failed to init transfer hook (you can do it manually on the Transfer page):", hookErr);
+        }
       }
 
       await refreshAll();
       return { tx, mint: mintKeypair.publicKey };
     },
-    [program, wallet.publicKey, refreshAll]
+    [program, wallet.publicKey, refreshAll, initExtraAccountMetaList]
   );
 
   const registerMint = useCallback(

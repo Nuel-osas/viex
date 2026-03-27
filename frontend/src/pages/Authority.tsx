@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useViex } from "../hooks/useViex";
 import { useToast } from "../components/Toast";
 import { parseError } from "../utils/errors";
 import { PublicKey } from "@solana/web3.js";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+
+interface PendingNomination {
+  mint: string;
+  symbol: string;
+  currentAuthority: string;
+  stablecoinPda: string;
+}
 
 export default function Authority() {
-  const { treasury, stablecoins, nominateAuthority, acceptAuthority, transferAuthority } = useViex();
+  const { treasury, stablecoins, nominateAuthority, acceptAuthority, transferAuthority, program } = useViex();
   const { addToast } = useToast();
+  const wallet = useWallet();
+  const { connection } = useConnection();
+  const [pendingNominations, setPendingNominations] = useState<PendingNomination[]>([]);
+  const [scanLoading, setScanLoading] = useState(false);
 
   const [nomMint, setNomMint] = useState("");
   const [nomAddr, setNomAddr] = useState("");
@@ -19,6 +31,49 @@ export default function Authority() {
   const [directAddr, setDirectAddr] = useState("");
   const [directLoading, setDirectLoading] = useState(false);
   const [confirmDirect, setConfirmDirect] = useState(false);
+
+  // Scan all stablecoins from program for pending nominations to this wallet
+  useEffect(() => {
+    if (!program || !wallet.publicKey) return;
+    const scan = async () => {
+      setScanLoading(true);
+      try {
+        const allStablecoins = await (program.account as any).stablecoin.all();
+        const pending: PendingNomination[] = [];
+        for (const acc of allStablecoins) {
+          const sc = acc.account;
+          if (sc.pendingAuthority && sc.pendingAuthority.toBase58() === wallet.publicKey!.toBase58()) {
+            pending.push({
+              mint: sc.mint.toBase58(),
+              symbol: sc.symbol || sc.name || sc.mint.toBase58().slice(0, 8),
+              currentAuthority: sc.authority.toBase58(),
+              stablecoinPda: acc.publicKey.toBase58(),
+            });
+          }
+        }
+        setPendingNominations(pending);
+      } catch (err) {
+        console.error("Failed to scan nominations:", err);
+      } finally {
+        setScanLoading(false);
+      }
+    };
+    scan();
+  }, [program, wallet.publicKey]);
+
+  const handleAcceptPending = async (mint: string) => {
+    setAcceptLoading(true);
+    try {
+      const tx = await acceptAuthority(new PublicKey(mint));
+      addToast("success", "Authority Accepted", "You are now the authority", tx);
+      // Remove from pending list
+      setPendingNominations((prev) => prev.filter((p) => p.mint !== mint));
+    } catch (err) {
+      addToast("error", "Failed", parseError(err));
+    } finally {
+      setAcceptLoading(false);
+    }
+  };
 
   const mintList = treasury?.mints || [];
   const getSymbol = (mint: string) => {
@@ -84,6 +139,58 @@ export default function Authority() {
           Transfer control of a stablecoin to a new authority
         </p>
       </div>
+
+      {/* Pending Nominations for Connected Wallet */}
+      {scanLoading && (
+        <div className="bg-gray-900/50 backdrop-blur-sm border border-amber-500/30 rounded-xl p-6">
+          <div className="flex items-center gap-3 text-amber-400">
+            <div className="w-5 h-5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+            <span className="text-sm">Scanning for pending nominations to your wallet...</span>
+          </div>
+        </div>
+      )}
+
+      {pendingNominations.length > 0 && (
+        <div className="bg-amber-500/5 backdrop-blur-sm border border-amber-500/30 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
+            <h2 className="text-lg font-semibold text-white">Pending Nominations for You</h2>
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              {pendingNominations.length} PENDING
+            </span>
+          </div>
+          <p className="text-sm text-gray-400 mb-4 ml-4">
+            You have been nominated as the new authority for the following stablecoins. Accept to take control.
+          </p>
+          <div className="space-y-3">
+            {pendingNominations.map((nom) => (
+              <div key={nom.mint} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-amber-500/20">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-semibold text-white">{nom.symbol}</span>
+                    <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                      AWAITING ACCEPTANCE
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Mint: <span className="font-mono text-gray-400">{nom.mint.slice(0, 16)}...</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Current authority: <span className="font-mono text-gray-400">{nom.currentAuthority.slice(0, 16)}...</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleAcceptPending(nom.mint)}
+                  disabled={acceptLoading}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all disabled:opacity-40"
+                >
+                  {acceptLoading ? "Accepting..." : "Accept Authority"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Two-Step Flow Diagram */}
       <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6">
@@ -209,13 +316,18 @@ export default function Authority() {
           Call this from the nominated wallet to complete the transfer.
         </p>
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Stablecoin Mint</label>
-          <select value={acceptMint} onChange={(e) => setAcceptMint(e.target.value)} className={`${selectClass} max-w-md`}>
-            <option value="">Select...</option>
-            {mintList.map((m) => (
-              <option key={m.toBase58()} value={m.toBase58()}>{getSymbol(m.toBase58())}</option>
-            ))}
-          </select>
+          <label className="block text-sm text-gray-400 mb-1.5">Stablecoin Mint Address</label>
+          <input type="text" value={acceptMint} onChange={(e) => setAcceptMint(e.target.value)} placeholder="Paste the mint address you were nominated for" className={`${inputClass} font-mono text-sm max-w-lg`} />
+          {mintList.length > 0 && (
+            <div className="mt-2">
+              <span className="text-xs text-gray-500">Or select from your treasury: </span>
+              {mintList.map((m) => (
+                <button key={m.toBase58()} onClick={() => setAcceptMint(m.toBase58())} className="text-xs text-emerald-400 hover:text-emerald-300 mx-1">
+                  {getSymbol(m.toBase58())}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <button
           onClick={handleAccept}
